@@ -73,7 +73,7 @@ export async function addDoc(collectionPath, data, idToken) {
   return await res.json();
 }
 
-// ── BrainGuard DB Operations ─────────────────────────────────
+// ── Think DB Operations ─────────────────────────────────
 
 export async function getUserProfile(uid, idToken) {
   return await getDoc(`users/${uid}`, idToken);

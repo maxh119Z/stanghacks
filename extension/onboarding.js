@@ -45,7 +45,7 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
     errorEl.textContent = res.error;
     errorEl.style.display = "block";
     btn.disabled = false;
-    btn.textContent = "Save & Start Using BrainGuard";
+    btn.textContent = "Save & Start Using Think";
     return;
   }
 
@@ -55,7 +55,7 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
       <div class="icon">🎉</div>
       <h2>You're all set!</h2>
       <p>
-        BrainGuard is now active. Head to ChatGPT, Claude, or Gemini and start prompting.<br>
+        Think is now active. Head to ChatGPT, Claude, or Gemini and start prompting.<br>
         We'll keep you honest.
       </p>
       <p style="margin-top: 16px; color: #64748b; font-size: 12px;">

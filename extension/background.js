@@ -1,4 +1,4 @@
-// BrainGuard Background Service Worker
+// Think Background Service Worker
 import { googleSignIn, getValidToken, saveAuthToStorage, signOut } from "./auth.js";
 import {
   getUserProfile, saveUserProfile, logPrompt,
@@ -157,7 +157,7 @@ function todayStr() {
 async function handleClassification(promptText, images = [], site = "") {
   const settings = await chrome.storage.sync.get(["apiKey", "enabled"]);
   if (settings.enabled === false) return { error: "disabled" };
-  if (!settings.apiKey) return { error: "No API key set. Click the BrainGuard icon to add your OpenAI key." };
+  if (!settings.apiKey) return { error: "No API key set. Click the Think icon to add your OpenAI key." };
 
   // Get profile for context
   let profile = null;
@@ -247,7 +247,7 @@ async function syncToFirebase(classification, promptText, site, auth, profile) {
       });
     }
   } catch (e) {
-    console.error("[BrainGuard] Sync error:", e);
+    console.error("[Think] Sync error:", e);
   }
 }
 
@@ -305,7 +305,7 @@ function buildSystemPrompt(profile) {
         .join("\n") + "\n";
   }
 
-  return `You are BrainGuard, a cognitive dependency classifier. Evaluate whether a student's AI prompt is something they should try solving themselves.
+  return `You are Think, a cognitive dependency classifier. Evaluate whether a student's AI prompt is something they should try solving themselves.
 
 STUDENT PROFILE:
 - Level: ${difficulty}

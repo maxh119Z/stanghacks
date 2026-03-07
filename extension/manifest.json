@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "BrainGuard — AI Dependency Monitor",
+  "name": "Think — AI Dependency Monitor",
   "version": "0.3.0",
   "description": "Like screentime, but for your brain. Nudges you to think before prompting AI.",
   "permissions": ["storage", "identity"],

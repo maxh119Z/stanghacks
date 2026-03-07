@@ -110,7 +110,7 @@ export async function getValidToken() {
       });
       return { idToken: refreshed.idToken, uid: refreshed.localId };
     } catch (e) {
-      console.error("[BrainGuard] Token refresh failed:", e);
+      console.error("[Think] Token refresh failed:", e);
       return null;
     }
   }

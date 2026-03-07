@@ -1,11 +1,11 @@
-// BrainGuard Content Script
+// Think Content Script
 (function () {
   "use strict";
 
   const config = getCurrentSiteConfig();
   if (!config) return;
 
-  console.log(`[BrainGuard] Active on ${config.name}`);
+  console.log(`[Think] Active on ${config.name}`);
 
   let isProcessing = false;
   let bypassNext = false;
@@ -29,7 +29,7 @@
         c.height = Math.min(loaded.height, 800);
         c.getContext("2d").drawImage(loaded, 0, 0, c.width, c.height);
         results.push(c.toDataURL("image/jpeg", 0.7));
-      } catch (e) { console.warn("[BrainGuard] Image extract fail:", e); }
+      } catch (e) { console.warn("[Think] Image extract fail:", e); }
     }
     return results;
   }
@@ -41,7 +41,7 @@
 
     const needsCooldown = classification.recommended_intervention === "nudge" || classification.recommended_intervention === "cooldown";
     const overlay = document.createElement("div");
-    overlay.id = "brainguard-overlay";
+    overlay.id = "think-overlay";
 
     const emoji = { direct_answer: "\u{1F926}", homework_completion: "\u{1F4DD}", concept_clarification: "\u{1F914}", brainstorming: "\u{1F4A1}", editing_polishing: "\u2728", advanced_help: "\u{1F680}", casual_chat: "\u{1F4AC}" }[classification.intent_category] || "\u{1F9E0}";
     const color = { low: "linear-gradient(135deg,#10b981,#059669)", medium: "linear-gradient(135deg,#f59e0b,#d97706)", high: "linear-gradient(135deg,#ef4444,#dc2626)" }[classification.outsourcing_risk] || "linear-gradient(135deg,#6366f1,#4f46e5)";
@@ -49,7 +49,7 @@
     const trunc = promptText.length > 120 ? promptText.slice(0, 120) + "\u2026" : promptText;
 
     const card = document.createElement("div");
-    card.id = "brainguard-card";
+    card.id = "think-card";
     card.innerHTML = `
       <div class="bg-header" style="background:${color}">
         <span class="bg-emoji">${emoji}</span>
@@ -108,7 +108,7 @@
     document.addEventListener("keydown", escH);
   }
 
-  function removeOverlay() { const el = document.getElementById("brainguard-overlay"); if (el) el.remove(); }
+  function removeOverlay() { const el = document.getElementById("think-overlay"); if (el) el.remove(); }
   function getPromptText() { const el = document.querySelector(config.inputSelector); return el ? config.getInputText(el) : ""; }
   function clickSend() { const btn = document.querySelector(config.sendButtonSelector); if (btn) btn.click(); }
 
@@ -133,10 +133,10 @@
         );
       });
 
-      if (result.error) { console.warn("[BrainGuard]", result.error); bypassNext = true; clickSend(); return; }
+      if (result.error) { console.warn("[Think]", result.error); bypassNext = true; clickSend(); return; }
       if (result.recommended_intervention === "allow") { bypassNext = true; clickSend(); }
       else { createOverlay(result, text); }
-    } catch (err) { console.error("[BrainGuard]", err); bypassNext = true; clickSend(); }
+    } catch (err) { console.error("[Think]", err); bypassNext = true; clickSend(); }
     finally { isProcessing = false; }
   }
 

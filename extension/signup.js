@@ -70,14 +70,7 @@ document.getElementById("signupBtn").addEventListener("click", async () => {
       } else {
         document.querySelector(".card").innerHTML = `
           <div style="text-align:center; padding: 30px 0;">
-            <div style="font-size: 48px; margin-bottom: 16px;">🎉</div>
-            <h2 style="font-size: 20px; margin-bottom: 8px;">You're all set!</h2>
-            <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">
-              BrainGuard is now active. Go prompt an AI — we'll keep you honest.
-            </p>
-            <p style="color: #64748b; font-size: 12px;">
-              You can close this tab and start using ChatGPT, Claude, or Gemini.
-            </p>
+            <p>Success</p>
           </div>
         `;
       }

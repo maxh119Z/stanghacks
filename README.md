@@ -1,4 +1,4 @@
-# name tbd
+# Think
 
 ## How It Works
 
@@ -24,7 +24,7 @@ firebase deploy
 ## Project Structure
 
 ```
-brainguard/
+stanghacks/
 ├── extension/
 │   ├── manifest.json          # MV3 with identity permission
 │   ├── firebase-config.js     # ← Put your Google Client ID here
