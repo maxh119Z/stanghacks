@@ -1,4 +1,5 @@
 # Think
+> Made by [Max Zhang](https://github.com/Maxh119Z/) and [Akshun Chinara](https://github.com/pikull/) at [Stang Hacks 2026](https://www.stanghacks.com/)
 
 ## How It Works
 
