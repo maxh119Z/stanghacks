@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 360px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0f0f1a;
+      color: #e2e8f0;
+    }
+
+    .header {
+      padding: 20px;
+      background: linear-gradient(135deg, #1e1b4b, #312e81);
+      border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    .header h1 {
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header p {
+      font-size: 12px;
+      color: #a5b4fc;
+      margin-top: 4px;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .toggle-row label { font-size: 14px; font-weight: 600; }
+
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 24px;
+    }
+
+    .toggle input { opacity: 0; width: 0; height: 0; }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      background: #334155;
+      border-radius: 24px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .slider::before {
+      content: "";
+      position: absolute;
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+
+    .toggle input:checked + .slider {
+      background: #6366f1;
+    }
+
+    .toggle input:checked + .slider::before {
+      transform: translateX(20px);
+    }
+
+    .section {
+      padding: 16px 20px;
+    }
+
+    .section label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #94a3b8;
+      margin-bottom: 8px;
+    }
+
+    input[type="password"],
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      background: #1e1e2f;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: #e2e8f0;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: #6366f1;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    select {
+      cursor: pointer;
+    }
+
+    .help-text {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 6px;
+    }
+
+    .divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .stats-bar {
+      display: flex;
+      gap: 1px;
+      padding: 16px 20px;
+      background: rgba(99, 102, 241, 0.05);
+    }
+
+    .stat {
+      flex: 1;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-size: 20px;
+      font-weight: 700;
+      color: #a5b4fc;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .save-btn {
+      display: block;
+      width: calc(100% - 40px);
+      margin: 0 20px 16px;
+      padding: 10px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .save-btn:hover {
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .save-btn.saved {
+      background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    .reset-btn {
+      display: block;
+      width: calc(100% - 40px);
+      margin: 0 20px 20px;
+      padding: 8px;
+      background: transparent;
+      color: #64748b;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .reset-btn:hover {
+      color: #ef4444;
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🧠 BrainGuard</h1>
+    <p>AI dependency monitor — think first, prompt second</p>
+  </div>
+
+  <div class="toggle-row">
+    <label>Enabled</label>
+    <div class="toggle">
+      <input type="checkbox" id="enabled" checked>
+      <span class="slider"></span>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-num" id="stat-total">0</div>
+      <div class="stat-label">Prompts</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="stat-nudged">0</div>
+      <div class="stat-label">Nudged</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="stat-clean">0</div>
+      <div class="stat-label">Clean</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section">
+    <label>OpenAI API Key</label>
+    <input type="password" id="apiKey" placeholder="sk-...">
+    <p class="help-text">Uses gpt-4o-mini (~$0.0001 per classification). Your key stays local in Chrome storage.</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section">
+    <label>Your Classes</label>
+    <textarea id="classes" placeholder="e.g. AP Calculus BC, AP English Lit, AP CS A, US History, Physics"></textarea>
+    <p class="help-text">Comma-separated. This helps BrainGuard understand what you should know.</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section">
+    <label>Difficulty Level</label>
+    <select id="difficulty">
+      <option value="middle_school">Middle School</option>
+      <option value="high_school" selected>High School</option>
+      <option value="ap_honors">AP / Honors</option>
+      <option value="college">College</option>
+    </select>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section" style="padding-bottom: 12px;">
+    <label>Sensitivity (nudge threshold)</label>
+    <select id="sensitivity">
+      <option value="1">Chill — only block obvious stuff</option>
+      <option value="2" selected>Balanced — nudge when borderline</option>
+      <option value="3">Strict — make me try almost everything</option>
+    </select>
+  </div>
+
+  <button class="save-btn" id="saveBtn">Save Settings</button>
+  <button class="reset-btn" id="resetStats">Reset Session Stats</button>
+
+  <script src="popup.js"></script>
+</body>
+</html>
