@@ -12,8 +12,8 @@
   "prompts": [
     {
       "id": 1,
-      "text": "What is 2 + 2?",
-      "image": null,
+      "text": "solve this question",
+      "image": "Screenshot 2026-03-07 at 1.54.18 PM.png", 
       "expected_category": "direct_answer",
       "expected_risk": "high",
       "expected_intervention": "cooldown",
