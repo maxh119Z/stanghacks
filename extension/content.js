@@ -43,7 +43,7 @@
     const overlay = document.createElement("div");
     overlay.id = "think-overlay";
 
-    //const emoji = { direct_answer: "\u{1F926}", homework_completion: "\u{1F4DD}", concept_clarification: "\u{1F914}", brainstorming: "\u{1F4A1}", editing_polishing: "\u2728", advanced_help: "\u{1F680}", casual_chat: "\u{1F4AC}" }[classification.intent_category] || "\u{1F9E0}";
+    const emoji = { direct_answer: "\u{1F926}", homework_completion: "\u{1F4DD}", concept_clarification: "\u{1F914}", brainstorming: "\u{1F4A1}", editing_polishing: "\u2728", advanced_help: "\u{1F680}", casual_chat: "\u{1F4AC}" }[classification.intent_category] || "\u{1F9E0}";
     const color = { low: "linear-gradient(135deg,#10b981,#059669)", medium: "linear-gradient(135deg,#f59e0b,#d97706)", high: "linear-gradient(135deg,#ef4444,#dc2626)" }[classification.outsourcing_risk] || "linear-gradient(135deg,#6366f1,#4f46e5)";
     const risk = classification.outsourcing_risk.toUpperCase();
     const trunc = promptText.length > 120 ? promptText.slice(0, 120) + "\u2026" : promptText;
@@ -52,7 +52,7 @@
     card.id = "think-card";
     card.innerHTML = `
       <div class="bg-header" style="background:${color}">
-     
+       
         <div class="bg-header-text">
           <span class="bg-category">${classification.intent_category.replace(/_/g, " ")}</span>
           <span class="bg-subject-tag">${classification.subject}</span>
@@ -61,7 +61,7 @@
       </div>
       <div class="bg-body">
         <p class="bg-message">${classification.message}</p>
-        ${classification.hint ? `<div class="bg-hint"><strong> Hint:</strong> ${classification.hint}</div>` : ""}
+        ${classification.hint ? `<div class="bg-hint"><strong>\u{1F4A1} Hint:</strong> ${classification.hint}</div>` : ""}
         <div class="bg-prompt-preview">"${trunc}"</div>
         <div class="bg-actions">
           <button id="bg-try-first" class="bg-btn bg-btn-primary">I'll try first</button>
@@ -133,10 +133,10 @@
         );
       });
 
-      if (result.error) { console.warn("[Think]", result.error); bypassNext = true; clickSend(); return; }
+      if (result.error) { console.warn("[think]", result.error); bypassNext = true; clickSend(); return; }
       if (result.recommended_intervention === "allow") { bypassNext = true; clickSend(); }
       else { createOverlay(result, text); }
-    } catch (err) { console.error("[Think]", err); bypassNext = true; clickSend(); }
+    } catch (err) { console.error("[]", err); bypassNext = true; clickSend(); }
     finally { isProcessing = false; }
   }
 
