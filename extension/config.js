@@ -1,4 +1,3 @@
-// Site-specific selectors for each AI platform
 const SITE_CONFIGS = {
   "chatgpt.com": {
     name: "ChatGPT",

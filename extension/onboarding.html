@@ -5,97 +5,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Think — Set Up Your Profile</title>
   <style>
-    /* RESET */
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: #1e1e1e; color: #d4d4d4; }
+    .page { width: 100%; max-width: 480px; padding: 40px 20px; }
 
-    /* CORE PAGE STYLING */
-    body {
-      min-height: 100vh; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center;
-      /* font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; */
-      background: #f4f4f5; /* Light Gray */
-      color: #18181b;      /* Dark Text */
-    }
-    .page { width: 100%; max-width: 500px; padding: 40px 20px; }
-
-    /* LOGO SECTION */
     .logo { text-align: center; margin-bottom: 28px; }
-    .logo h1 { font-size: 24px; text-transform: uppercase; letter-spacing: -0.5px; }
-    .logo p { color: #52525b; font-size: 14px; margin-top: 6px; }
+    .logo h1 { font-size: 18px; text-transform: uppercase; letter-spacing: 0.5px; color: #d4d4d4; }
+    .logo p { color: #6a6a6a; font-size: 13px; margin-top: 6px; }
 
-    /* USER PREVIEW */
-    .user-preview {
-      display: flex; align-items: center; gap: 14px; justify-content: center; margin-bottom: 28px;
-    }
-    .user-preview img { 
-      width: 48px; height: 48px; 
-      border-radius: 0; /* NO RADIUS */
-      border: 1px solid #000; 
-    }
+    .user-preview { display: flex; align-items: center; gap: 14px; justify-content: center; margin-bottom: 28px; }
+    .user-preview img { width: 44px; height: 44px; border: 1px solid #4a4a4f; }
     .user-preview .info { text-align: left; }
-    .user-preview .name { font-size: 16px;  }
-    .user-preview .email { font-size: 12px; color: #71717a; }
+    .user-preview .name { font-size: 15px; font-weight: 600; color: #d4d4d4; }
+    .user-preview .email { font-size: 12px; color: #6a6a6a; }
 
-    /* CARD CONTAINER */
-    .card {
-      /* background: #ffffff;  */
-      border-radius: 0; /* NO RADIUS */
-      padding: 32px;
-      /* border: 1px solid #000; High Contrast Border */
-     
-    }
-    .card h2 {
-      font-size: 14px; color: #000;
-      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 24px;
-      /* border-bottom: 2px solid #000; padding-bottom: 10px; */
-    }
+    .card { background: #252526; border: 1px solid #3e3e42; padding: 28px; }
+    .card h2 { font-size: 11px; color: #969696; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 20px; border-bottom: 1px solid #3e3e42; padding-bottom: 8px; }
 
-    /* FORMS */
-    .form-group { margin-bottom: 20px; }
-    .form-group label {
-      display: block; font-size: 12px;
-      text-transform: uppercase; letter-spacing: 0.5px;
-      color: #000; margin-bottom: 8px;
-    }
-    input, textarea, select {
-      width: 100%; padding: 12px; background: #fff;
-      border: 1px solid #71717a; 
-      border-radius: 0; /* NO RADIUS */
-    }
-    input:focus, textarea:focus, select:focus { 
-      border-color: #000; 
-      background: #fafafa; 
-      box-shadow: 0 0 0 1px #000; 
-    }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #969696; margin-bottom: 6px; }
+    input, textarea, select { width: 100%; padding: 11px 12px; background: #2d2d30; border: 1px solid #3e3e42; color: #d4d4d4; font-size: 13px; font-family: inherit; outline: none; }
+    input:focus, textarea:focus, select:focus { border-color: #4ec9b0; }
     textarea { resize: vertical; min-height: 80px; }
-    .help { font-size: 12px; color: #52525b; margin-top: 6px; line-height: 1.4; }
+    .help { font-size: 11px; color: #6a6a6a; margin-top: 5px; line-height: 1.4; }
 
-    /* BUTTONS */
-    .btn {
-      display: block; width: 100%; padding: 16px; 
-      border-radius: 0; /* NO RADIUS */
-      font-size: 14px;  text-transform: uppercase; cursor: pointer; 
-      border: 1px solid #000;
-      background: #000; color: white;
-      margin-top: 32px; transition: all 0.1s;
-    }
-    .btn:hover { background: #333; }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn { display: block; width: 100%; padding: 14px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; cursor: pointer; border: none; background: #4ec9b0; color: #1e1e1e; margin-top: 24px; }
+    .btn:hover { background: #3db89f; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    .error { 
-      color: #ef4444;  font-size: 13px; margin-top: 10px; display: none; 
-      border: 1px solid #ef4444; padding: 8px; background: #fef2f2;
-    }
+    .error { color: #f14c4c; font-size: 13px; margin-top: 10px; display: none; border: 1px solid #f14c4c; padding: 8px 12px; background: rgba(241,76,76,0.08); }
 
-    /* SUCCESS STATE */
-    .success {
-      text-align: center; padding: 40px 0;
-    }
-    .success .icon { font-size: 52px; margin-bottom: 16px; }
-    .success h2 { font-size: 22px; margin-bottom: 8px; color: #000; }
-    .success p { color: #52525b; font-size: 14px; line-height: 1.6; }
+    .success { text-align: center; padding: 40px 0; }
+    .success h2 { font-size: 20px; margin-bottom: 8px; color: #d4d4d4; }
+    .success p { color: #6a6a6a; font-size: 14px; line-height: 1.6; }
   </style>
 </head>
 <body>
@@ -115,43 +57,14 @@
 
     <div class="card" id="formCard">
       <h2>Your Profile</h2>
-
-      <div class="form-group">
-        <label>Name</label>
-        <input type="text" id="displayName" placeholder="Your name">
-      </div>
-
-      <div class="form-group">
-        <label>Your Classes</label>
-        <textarea id="classes" placeholder="AP Calculus BC, AP English Lit, AP CSA, Physics 1, US History..."></textarea>
-        <p class="help">Comma-separated please.</p>
-      </div>
-
-      <div class="form-group">
-        <label>Level</label>
-        <select id="difficulty">
-          <option value="middle_school">Middle School</option>
-          <option value="high_school" selected>High School</option>
-          <option value="ap_honors">AP / Honors</option>
-          <option value="college">College</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Sensitivity</label>
-        <select id="sensitivity">
-          <option value="1">Chill — only block obvious stuff</option>
-          <option value="2" selected>Balanced — nudge when borderline</option>
-          <option value="3">Strict — make me try almost everything</option>
-        </select>
-      </div>
-
+      <div class="form-group"><label>Name</label><input type="text" id="displayName" placeholder="Your name"></div>
+      <div class="form-group"><label>Your Classes</label><textarea id="classes" placeholder="AP Calculus BC, AP English Lit, AP CSA, Physics 1, US History..."></textarea><p class="help">Comma-separated.</p></div>
+      <div class="form-group"><label>Level</label><select id="difficulty"><option value="middle_school">Middle School</option><option value="high_school" selected>High School</option><option value="ap_honors">AP / Honors</option><option value="college">College</option></select></div>
+      <div class="form-group"><label>Sensitivity</label><select id="sensitivity"><option value="1">Chill — only block obvious stuff</option><option value="2" selected>Balanced — nudge when borderline</option><option value="3">Strict — make me try almost everything</option></select></div>
       <div id="errorMsg" class="error"></div>
-
       <button class="btn" id="saveBtn">Start Thinking</button>
     </div>
   </div>
-
   <script src="onboarding.js"></script>
 </body>
 </html>
