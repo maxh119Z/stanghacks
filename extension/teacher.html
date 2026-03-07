@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Think — Teacher Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: #1e1e1e; color: #d4d4d4; line-height: 1.4; }
+    .nav { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; background: #252526; border-bottom: 1px solid #3e3e42; position: sticky; top: 0; z-index: 100; }
+    .nav-brand { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .nav-right { display: flex; align-items: center; gap: 10px; font-size: 12px; color: #969696; }
+    .nav-right button { background: #2d2d30; border: 1px solid #3e3e42; color: #969696; cursor: pointer; font-size: 11px; padding: 4px 10px; }
+    .nav-right button:hover { background: #333336; color: #d4d4d4; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 24px; }
+    .card { background: #252526; border: 1px solid #3e3e42; padding: 20px; margin-bottom: 16px; }
+    .card h2 { font-size: 11px; color: #969696; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #3e3e42; padding-bottom: 8px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #969696; margin-bottom: 6px; }
+    input { width: 100%; padding: 10px 12px; background: #2d2d30; border: 1px solid #3e3e42; color: #d4d4d4; font-size: 13px; outline: none; font-family: inherit; }
+    input:focus { border-color: #4ec9b0; }
+    .help { font-size: 11px; color: #6a6a6a; margin-top: 4px; }
+    .btn { display: inline-block; padding: 10px 20px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; background: #4ec9b0; color: #1e1e1e; text-transform: uppercase; }
+    .btn:hover { background: #3db89f; }
+    .btn-sm { padding: 6px 12px; font-size: 11px; }
+    .btn-outline { background: none; color: #969696; border: 1px solid #3e3e42; }
+    .btn-outline:hover { background: #2d2d30; color: #d4d4d4; }
+    .empty { text-align: center; padding: 28px 20px; color: #6a6a6a; font-style: italic; border: 1px dashed #3e3e42; }
+
+    /* Class list */
+    .class-item { background: #2d2d30; border: 1px solid #3e3e42; padding: 16px; margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
+    .class-item:hover { border-color: #4ec9b0; }
+    .class-item .ci-name { font-size: 15px; font-weight: 600; }
+    .class-item .ci-meta { font-size: 11px; color: #6a6a6a; margin-top: 2px; }
+    .class-item .ci-code { font-size: 14px; font-weight: 700; color: #4ec9b0; font-family: "Consolas", monospace; letter-spacing: 2px; }
+
+    /* Student list */
+    .student-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .student-table th { text-align: left; padding: 10px 12px; color: #969696; text-transform: uppercase; font-size: 10px; border-bottom: 1px solid #3e3e42; }
+    .student-table td { padding: 10px 12px; border-bottom: 1px solid #2d2d30; }
+    .student-table tr:hover td { background: #2d2d30; cursor: pointer; }
+    .student-table .flagged { color: #f14c4c; font-weight: 700; }
+
+    /* Prompt table */
+    .prompt-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .prompt-table th { text-align: left; padding: 8px 10px; color: #969696; text-transform: uppercase; font-size: 10px; border-bottom: 1px solid #3e3e42; }
+    .prompt-table td { padding: 8px 10px; border-bottom: 1px solid #2d2d30; vertical-align: top; }
+    .prompt-table tr:hover td { background: #2d2d30; }
+    .prompt-table tr.flagged-row td { background: rgba(241,76,76,0.05); }
+    .prompt-text { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tag { display: inline-block; padding: 2px 6px; font-size: 10px; font-weight: 600; border: 1px solid #3e3e42; color: #969696; }
+    .tag.risk-high { border-color: #f14c4c; color: #f14c4c; }
+    .tag.risk-medium { border-color: #cca700; color: #cca700; }
+    .tag.risk-low { border-color: #4ec9b0; color: #4ec9b0; }
+
+    .cat-row { display: flex; align-items: center; gap: 10px; padding: 5px 0; border-bottom: 1px solid #2d2d30; }
+    .cat-row:last-child { border-bottom: none; }
+    .cat-name { font-size: 12px; width: 150px; text-transform: capitalize; }
+    .cat-bar-bg { flex: 1; height: 8px; background: #2d2d30; overflow: hidden; }
+    .cat-bar-fill { height: 100%; background: #4ec9b0; }
+    .cat-count { font-size: 12px; color: #969696; width: 30px; text-align: right; }
+
+    .stats-mini { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 16px; }
+    .stats-mini .sm { background: #2d2d30; border: 1px solid #3e3e42; padding: 12px; text-align: center; }
+    .stats-mini .sm .num { font-size: 22px; font-weight: 700; }
+    .stats-mini .sm .label { font-size: 9px; color: #6a6a6a; text-transform: uppercase; margin-top: 2px; }
+
+    .toolbar { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; flex-wrap: wrap; }
+    .back-btn { background: none; border: none; color: #4ec9b0; cursor: pointer; font-size: 12px; padding: 4px 0; font-weight: 600; }
+    .back-btn:hover { text-decoration: underline; }
+
+    .view { display: none; }
+    .view.active { display: block; }
+    .toast { position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background: #4ec9b0; color: #1e1e1e; font-size: 12px; font-weight: 600; opacity: 0; transform: translateY(10px); transition: all 0.3s; z-index: 200; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-brand">Think — Teacher</div>
+    <div class="nav-right">
+      <span id="navEmail">Loading...</span>
+      <button id="navSignout">Sign out</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- View: Class List -->
+    <div class="view active" id="viewClasses">
+      <div class="card">
+        <h2>Create a Class</h2>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="newClassName" placeholder="e.g. AP Calculus BC — Period 3" style="flex:1;">
+          <button class="btn" id="createClassBtn">Create</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Your Classes</h2>
+        <div id="classList"><div class="empty">No classes yet. Create one above.</div></div>
+      </div>
+    </div>
+
+    <!-- View: Class Detail (students) -->
+    <div class="view" id="viewClassDetail">
+      <div class="toolbar">
+        <button class="back-btn" id="backToClasses">&larr; Back to classes</button>
+        <span style="flex:1;"></span>
+        <button class="btn btn-sm btn-outline" id="exportClassCsv">Export CSV</button>
+      </div>
+      <div class="card">
+        <h2 id="classDetailName">Class</h2>
+        <p class="help" id="classDetailMeta"></p>
+      </div>
+      <div class="card">
+        <h2>Students</h2>
+        <div id="studentList"><div class="empty">No students have joined yet</div></div>
+      </div>
+    </div>
+
+    <!-- View: Student Detail -->
+    <div class="view" id="viewStudentDetail">
+      <div class="toolbar">
+        <button class="back-btn" id="backToClass">&larr; Back to class</button>
+      </div>
+      <div class="card">
+        <h2 id="studentName">Student</h2>
+        <div class="stats-mini" id="studentStats"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div><h2 style="font-size:10px;color:#969696;text-transform:uppercase;margin-bottom:8px;">Categories</h2><div id="studentCats"></div></div>
+          <div><h2 style="font-size:10px;color:#969696;text-transform:uppercase;margin-bottom:8px;">Subjects</h2><div id="studentSubjects"></div></div>
+        </div>
+      </div>
+      <div class="card" style="overflow-x:auto;">
+        <h2>Flagged Prompts</h2>
+        <div id="studentPrompts"><div class="empty">Loading...</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Saved</div>
+  <script src="teacher.js"></script>
+</body>
+</html>

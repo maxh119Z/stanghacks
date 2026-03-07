@@ -1,5 +1,7 @@
 import { FIRESTORE_URL } from "./firebase-config.js";
 
+// ── Firestore Type Converters ────────────────────────────────
+
 function toVal(v) {
   if (v === null || v === undefined) return { nullValue: null };
   if (typeof v === "string") return { stringValue: v };
@@ -25,6 +27,8 @@ function fromVal(v) {
 function fromDoc(doc) { const out = {}; for (const [k, v] of Object.entries(doc.fields || {})) out[k] = fromVal(v); return out; }
 function toFields(obj) { const fields = {}; for (const [k, v] of Object.entries(obj)) fields[k] = toVal(v); return fields; }
 
+// ── CRUD ─────────────────────────────────────────────────────
+
 export async function getDoc(path, idToken) {
   const res = await fetch(`${FIRESTORE_URL}/${path}`, { headers: { Authorization: `Bearer ${idToken}` } });
   if (res.status === 404) return null;
@@ -41,7 +45,8 @@ export async function setDoc(path, data, idToken) {
 export async function addDoc(collectionPath, data, idToken) {
   const res = await fetch(`${FIRESTORE_URL}/${collectionPath}`, { method: "POST", headers: { Authorization: `Bearer ${idToken}`, "Content-Type": "application/json" }, body: JSON.stringify({ fields: toFields(data) }) });
   if (!res.ok) throw new Error(`ADD ${collectionPath}: ${res.status}`);
-  return await res.json();
+  const raw = await res.json();
+  return { id: raw.name.split("/").pop(), ...fromDoc(raw) };
 }
 
 export async function deleteDoc(path, idToken) {
@@ -49,21 +54,14 @@ export async function deleteDoc(path, idToken) {
   if (!res.ok && res.status !== 404) throw new Error(`DELETE ${path}: ${res.status}`);
 }
 
-// ── List docs in a subcollection ─────────────────────────────
-
 export async function listDocs(collectionPath, idToken, pageSize = 100) {
-  const res = await fetch(`${FIRESTORE_URL}/${collectionPath}?pageSize=${pageSize}`, {
-    headers: { Authorization: `Bearer ${idToken}` },
-  });
+  const res = await fetch(`${FIRESTORE_URL}/${collectionPath}?pageSize=${pageSize}`, { headers: { Authorization: `Bearer ${idToken}` } });
   if (!res.ok) throw new Error(`LIST ${collectionPath}: ${res.status}`);
   const data = await res.json();
-  return (data.documents || []).map((doc) => ({
-    id: doc.name.split("/").pop(),
-    ...fromDoc(doc),
-  }));
+  return (data.documents || []).map((doc) => ({ id: doc.name.split("/").pop(), ...fromDoc(doc) }));
 }
 
-// ── Think-specific operations ────────────────────────────────
+// ── User Operations ──────────────────────────────────────────
 
 export async function getUserProfile(uid, idToken) { return await getDoc(`users/${uid}`, idToken); }
 export async function saveUserProfile(uid, idToken, profile) { return await setDoc(`users/${uid}`, profile, idToken); }
@@ -75,20 +73,15 @@ export async function logPrompt(uid, idToken, promptData) {
 export async function getDailyStats(uid, idToken, dateStr) { return await getDoc(`users/${uid}/dailyStats/${dateStr}`, idToken); }
 export async function saveDailyStats(uid, idToken, dateStr, stats) { return await setDoc(`users/${uid}/dailyStats/${dateStr}`, stats, idToken); }
 
-// List recent prompts for history view
 export async function listPrompts(uid, idToken, limit = 50) {
   const prompts = await listDocs(`users/${uid}/prompts`, idToken, limit);
-  // Sort by timestamp descending (newest first)
   return prompts.sort((a, b) => (b.timestamp || "").localeCompare(a.timestamp || ""));
 }
 
-// Reset daily stats for last N days
 export async function resetDailyStats(uid, idToken, days = 30) {
-  const empty = { total: 0, nudged: 0, allowed: 0, sentAnyway: 0, triedFirst: 0, categories: {}, subjects: {}, sites: {} };
   for (let i = 0; i < days; i++) {
     const d = new Date(); d.setDate(d.getDate() - i);
-    const ds = d.toISOString().split("T")[0];
-    try { await deleteDoc(`users/${uid}/dailyStats/${ds}`, idToken); } catch (e) { /* ignore */ }
+    try { await deleteDoc(`users/${uid}/dailyStats/${d.toISOString().split("T")[0]}`, idToken); } catch (e) {}
   }
 }
 
@@ -104,4 +97,94 @@ export async function updateDynamicProfile(uid, idToken, updates) {
     }
   }
   await setDoc(`users/${uid}`, { ...existing, dynamicKnowledge: dk, lastActive: new Date().toISOString() }, idToken);
+}
+
+// ── Class Operations ─────────────────────────────────────────
+
+function generateCode() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no I/O/0/1 to avoid confusion
+  let code = "";
+  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+export async function createClass(idToken, data) {
+  // data: { name, teacherUid, teacherName }
+  const classData = {
+    name: data.name,
+    teacherUid: data.teacherUid,
+    teacherName: data.teacherName,
+    code: generateCode(),
+    createdAt: new Date().toISOString(),
+    studentCount: 0,
+    studentUids: [],
+  };
+  const result = await addDoc("classes", classData, idToken);
+  return { id: result.id, ...classData };
+}
+
+export async function getClassById(classId, idToken) {
+  return await getDoc(`classes/${classId}`, idToken);
+}
+
+// Find a class by its join code — scan all classes (small scale, fine for hackathon)
+export async function getClassByCode(code, idToken) {
+  const classes = await listDocs("classes", idToken, 500);
+  return classes.find((c) => c.code === code.toUpperCase()) || null;
+}
+
+export async function joinClass(classId, studentUid, idToken) {
+  const cls = await getClassById(classId, idToken);
+  if (!cls) throw new Error("Class not found");
+  const uids = cls.studentUids || [];
+  if (uids.includes(studentUid)) return cls; // already joined
+  uids.push(studentUid);
+  cls.studentUids = uids;
+  cls.studentCount = uids.length;
+  await setDoc(`classes/${classId}`, cls, idToken);
+  return cls;
+}
+
+export async function leaveClass(classId, studentUid, idToken) {
+  const cls = await getClassById(classId, idToken);
+  if (!cls) return;
+  cls.studentUids = (cls.studentUids || []).filter((u) => u !== studentUid);
+  cls.studentCount = cls.studentUids.length;
+  await setDoc(`classes/${classId}`, cls, idToken);
+}
+
+// Get all classes for a teacher
+export async function getTeacherClasses(teacherUid, idToken) {
+  const all = await listDocs("classes", idToken, 500);
+  return all.filter((c) => c.teacherUid === teacherUid);
+}
+
+// Get all classes a student is in
+export async function getStudentClasses(studentUid, idToken) {
+  const all = await listDocs("classes", idToken, 500);
+  return all.filter((c) => (c.studentUids || []).includes(studentUid));
+}
+
+// Get a student's flagged prompts (outsourcingRisk != "low")
+export async function getStudentFlaggedPrompts(studentUid, idToken, limit = 50) {
+  const prompts = await listPrompts(studentUid, idToken, limit);
+  return prompts.filter((p) => p.outsourcingRisk && p.outsourcingRisk !== "low");
+}
+
+// Get aggregated stats for a student over N days
+export async function getStudentStatsAggregate(studentUid, idToken, days = 7) {
+  const agg = { total: 0, nudged: 0, allowed: 0, categories: {}, subjects: {}, sites: {} };
+  for (let i = 0; i < days; i++) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const ds = d.toISOString().split("T")[0];
+    const s = await getDailyStats(studentUid, idToken, ds);
+    if (!s) continue;
+    agg.total += s.total || 0;
+    agg.nudged += s.nudged || 0;
+    agg.allowed += s.allowed || 0;
+    for (const [k, v] of Object.entries(s.categories || {})) agg.categories[k] = (agg.categories[k] || 0) + v;
+    for (const [k, v] of Object.entries(s.subjects || {})) agg.subjects[k] = (agg.subjects[k] || 0) + v;
+    for (const [k, v] of Object.entries(s.sites || {})) agg.sites[k] = (agg.sites[k] || 0) + v;
+  }
+  return agg;
 }

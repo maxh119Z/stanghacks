@@ -1,6 +1,5 @@
 function msg(type, data = {}) { return new Promise((r) => chrome.runtime.sendMessage({ type, ...data }, r)); }
 
-// ── Auth ──
 async function loadAuth() {
   const auth = await msg("GET_AUTH");
   if (auth && auth.loggedIn) {
@@ -10,12 +9,17 @@ async function loadAuth() {
     document.getElementById("userName").textContent = auth.displayName || "User";
     document.getElementById("userEmail").textContent = auth.email || "";
     if (auth.photoUrl) document.getElementById("userAvatar").src = auth.photoUrl;
-    // Load current status
+
+    // Show teacher button if teacher
+    if (auth.role === "teacher") {
+      document.getElementById("teacherBtn").classList.remove("hidden");
+    }
+
+    // Load status + stats
     const profileRes = await msg("GET_PROFILE");
     if (profileRes?.profile?.currentStatus) {
       document.getElementById("currentStatus").value = profileRes.profile.currentStatus;
     }
-    // Load stats
     const statsRes = await msg("GET_STATS", { days: 1 });
     if (statsRes?.stats?.[0]) {
       document.getElementById("statTotal").textContent = statsRes.stats[0].total || 0;
@@ -42,18 +46,14 @@ document.getElementById("googleSignInBtn").addEventListener("click", async () =>
 
 document.getElementById("signOutBtn").addEventListener("click", async () => { await msg("SIGN_OUT"); loadAuth(); });
 
-// ── Current Status ──
+// ── Status ──
 document.getElementById("statusSaveBtn").addEventListener("click", async () => {
   const status = document.getElementById("currentStatus").value.trim();
-  const btn = document.getElementById("statusSaveBtn");
-  btn.textContent = "...";
+  const btn = document.getElementById("statusSaveBtn"); btn.textContent = "...";
   await msg("SAVE_STATUS", { status });
   btn.textContent = "Set";
 });
-// Also save on Enter
-document.getElementById("currentStatus").addEventListener("keydown", (e) => {
-  if (e.key === "Enter") document.getElementById("statusSaveBtn").click();
-});
+document.getElementById("currentStatus").addEventListener("keydown", (e) => { if (e.key === "Enter") document.getElementById("statusSaveBtn").click(); });
 
 // ── Settings ──
 chrome.storage.sync.get(["apiKey", "enabled"], (data) => {
@@ -61,9 +61,12 @@ chrome.storage.sync.get(["apiKey", "enabled"], (data) => {
   document.getElementById("enabled").checked = data.enabled !== false;
 });
 
-// FIX: Toggle saves immediately, not just on Save button
-document.getElementById("enabled").addEventListener("change", () => {
-  chrome.storage.sync.set({ enabled: document.getElementById("enabled").checked });
+// FIX: Toggle saves immediately on change
+document.getElementById("enabled").addEventListener("change", (e) => {
+  const checked = e.target.checked;
+  chrome.storage.sync.set({ enabled: checked }, () => {
+    console.log("[Think] Active toggled:", checked);
+  });
 });
 
 // ── Save API Key ──
@@ -78,14 +81,14 @@ document.getElementById("saveBtn").addEventListener("click", () => {
   });
 });
 
-// ── Dashboard ──
+// ── Nav buttons ──
 document.getElementById("dashboardBtn").addEventListener("click", () => msg("OPEN_PAGE", { page: "dashboard.html" }));
+document.getElementById("teacherBtn").addEventListener("click", () => msg("OPEN_PAGE", { page: "teacher.html" }));
 
 // ── Reset (Firebase) ──
 document.getElementById("resetBtn").addEventListener("click", async () => {
   if (!confirm("Reset all stats? This clears your Firebase data for the last 30 days.")) return;
-  const btn = document.getElementById("resetBtn");
-  btn.textContent = "Resetting...";
+  const btn = document.getElementById("resetBtn"); btn.textContent = "Resetting...";
   await msg("RESET_STATS");
   document.getElementById("statTotal").textContent = "0";
   document.getElementById("statNudged").textContent = "0";
