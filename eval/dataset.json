@@ -1,0 +1,239 @@
+{
+  "profile": {
+    "classes": ["AP Calculus BC", "AP English Literature", "AP Computer Science A", "AP US History", "Physics 1"],
+    "difficulty": "ap_honors",
+    "sensitivity": 2,
+    "currentStatus": "",
+    "dynamicKnowledge": {
+      "calculus": { "promptCount": 10, "topics": ["derivatives", "integration", "chain rule"] },
+      "english": { "promptCount": 5, "topics": ["rhetorical analysis", "thesis writing"] }
+    }
+  },
+  "prompts": [
+    {
+      "id": 1,
+      "text": "What is 2 + 2?",
+      "image": null,
+      "expected_category": "direct_answer",
+      "expected_risk": "high",
+      "expected_intervention": "cooldown",
+      "notes": "Trivially solvable — AP student asking basic arithmetic"
+    },
+    {
+      "id": 2,
+      "text": "Explain the concept of limits and how they relate to derivatives intuitively",
+      "image": null,
+      "expected_category": "concept_clarification",
+      "expected_risk": "low",
+      "expected_intervention": "allow",
+      "notes": "Good use of AI — seeking conceptual understanding"
+    },
+    {
+      "id": 3,
+      "text": "Write me a 5 paragraph essay about the American Revolution",
+      "image": null,
+      "expected_category": "homework_completion",
+      "expected_risk": "high",
+      "expected_intervention": "cooldown",
+      "notes": "Clear homework outsourcing"
+    },
+    {
+      "id": 4,
+      "text": "What are some unique angles I could take for my APUSH essay on westward expansion?",
+      "image": null,
+      "expected_category": "brainstorming",
+      "expected_risk": "low",
+      "expected_intervention": "allow",
+      "notes": "Brainstorming ideas, not asking for the essay itself"
+    },
+    {
+      "id": 5,
+      "text": "Can you proofread this paragraph and suggest improvements? Here is my draft: The industrial revolution changed everything about society...",
+      "image": null,
+      "expected_category": "editing_polishing",
+      "expected_risk": "low",
+      "expected_intervention": "allow",
+      "notes": "Student did the work, wants feedback"
+    },
+    {
+      "id": 6,
+      "text": "Solve the integral of x*sin(x) dx",
+      "image": null,
+      "expected_category": "direct_answer",
+      "expected_risk": "high",
+      "expected_intervention": "nudge",
+      "notes": "AP Calc student should know integration by parts"
+    },
+    {
+      "id": 7,
+      "text": "What year did World War 2 end?",
+      "image": null,
+      "expected_category": "direct_answer",
+      "expected_risk": "high",
+      "expected_intervention": "cooldown",
+      "notes": "Easily googleable basic fact — APUSH student should know"
+    },
+    {
+      "id": 8,
+      "text": "I'm getting a NullPointerException on line 45 of my Java code. Here's my code: public class Main { public static void main...",
+      "image": null,
+      "expected_category": "advanced_help",
+      "expected_risk": "low",
+      "expected_intervention": "allow",
+      "notes": "Debugging — legitimate CS help"
+    },
+    {
+      "id": 9,
+      "text": "Write a Java program that implements a binary search tree with insert, delete, and search methods",
+      "image": null,
+      "expected_category": "homework_completion",
+      "expected_risk": "high",
+      "expected_intervention": "cooldown",
+      "notes": "Asking AI to write entire assignment"
+    },
+    {
+      "id": 10,
+      "text": "What's the difference between static and dynamic binding in Java?",
+      "image": null,
+      "expected_category": "concept_clarification",
+      "expected_risk": "low",
+      "expected_intervention": "allow",
+      "notes": "Conceptual question — good use"
+    },
+    {
+      "id": 11,
+      "text": "Summarize chapters 5-8 of The Great Gatsby for me",
+      "image": null,
+      "expected_category": "homework_completion",
+      "expected_risk": "high",
+      "expected_intervention": "nudge",
+      "notes": "Outsourcing reading comprehension"
+    },
+    {
+      "id": 12,
+      "text": "What literary devices does Fitzgerald use in The Great Gatsby and why are they effective?",
+      "image": null,
+      "expected_category": "concept_clarification",
+      "expected_risk": "medium",
+      "expected_intervention": "hint",
+      "notes": "Borderline — could be genuine analysis prep or essay fodder"
+    },
+    {
+      "id": 13,
+      "text": "Hey what's up, how's your day going?",
+      "image": null,
+      "expected_category": "casual_chat",
+      "expected_risk": "low",
+      "expected_intervention": "allow",
+      "notes": "Not academic"
+    },
+    {
+      "id": 14,
+      "text": "Translate this sentence to Spanish: The cat sat on the mat",
+      "image": null,
+      "expected_category": "direct_answer",
+      "expected_risk": "high",
+      "expected_intervention": "nudge",
+      "notes": "Direct translation — should try themselves"
+    },
+    {
+      "id": 15,
+      "text": "Can you explain how Newton's third law applies to rocket propulsion? I understand the law but not the application",
+      "image": null,
+      "expected_category": "concept_clarification",
+      "expected_risk": "low",
+      "expected_intervention": "allow",
+      "notes": "Student knows the concept, needs application help"
+    },
+    {
+      "id": 16,
+      "text": "Answer questions 1 through 10 on this worksheet",
+      "image": "calc_homework.jpg",
+      "expected_category": "homework_completion",
+      "expected_risk": "high",
+      "expected_intervention": "cooldown",
+      "notes": "IMAGE: Photo of homework — blatant outsourcing"
+    },
+    {
+      "id": 17,
+      "text": "I don't understand this diagram, can you explain what's happening?",
+      "image": "physics_diagram.jpg",
+      "expected_category": "concept_clarification",
+      "expected_risk": "low",
+      "expected_intervention": "allow",
+      "notes": "IMAGE: Asking for explanation of a concept shown in diagram"
+    },
+    {
+      "id": 18,
+      "text": "What is the answer to this?",
+      "image": "essay_prompt.jpg",
+      "expected_category": "homework_completion",
+      "expected_risk": "high",
+      "expected_intervention": "cooldown",
+      "notes": "IMAGE: Photo of essay prompt — asking for the answer directly"
+    },
+    {
+      "id": 19,
+      "text": "Help me understand why my recursive function isn't hitting the base case. I think the issue is in the condition but I'm not sure",
+      "image": null,
+      "expected_category": "advanced_help",
+      "expected_risk": "low",
+      "expected_intervention": "allow",
+      "notes": "Student has narrowed the bug, needs guidance"
+    },
+    {
+      "id": 20,
+      "text": "What is the derivative of sin(x)?",
+      "image": null,
+      "expected_category": "direct_answer",
+      "expected_risk": "high",
+      "expected_intervention": "nudge",
+      "notes": "AP Calc student should have this memorized"
+    },
+    {
+      "id": 21,
+      "text": "I'm writing a research paper on climate change. Can you help me find a thesis statement that's argumentative but not too broad?",
+      "image": null,
+      "expected_category": "brainstorming",
+      "expected_risk": "low",
+      "expected_intervention": "allow",
+      "notes": "Strategic writing help — not outsourcing the writing"
+    },
+    {
+      "id": 22,
+      "text": "What's the formula for the quadratic equation?",
+      "image": null,
+      "expected_category": "direct_answer",
+      "expected_risk": "high",
+      "expected_intervention": "nudge",
+      "notes": "AP level student should know this formula"
+    },
+    {
+      "id": 23,
+      "text": "Compare and contrast the Federalist and Anti-Federalist arguments. Write at least 500 words.",
+      "image": null,
+      "expected_category": "homework_completion",
+      "expected_risk": "high",
+      "expected_intervention": "cooldown",
+      "notes": "Has word count requirement — clearly an assignment"
+    },
+    {
+      "id": 24,
+      "text": "I've been staring at this proof for 30 minutes and I can't figure out the inductive step. Here's what I have so far: Base case P(1) is true because...",
+      "image": null,
+      "expected_category": "advanced_help",
+      "expected_risk": "low",
+      "expected_intervention": "allow",
+      "notes": "Genuine struggle — student showed work and tried"
+    },
+    {
+      "id": 25,
+      "text": "Give me the answers to the AP Physics 1 2024 free response questions",
+      "image": null,
+      "expected_category": "homework_completion",
+      "expected_risk": "high",
+      "expected_intervention": "cooldown",
+      "notes": "Asking for exam answers directly"
+    }
+  ]
+}

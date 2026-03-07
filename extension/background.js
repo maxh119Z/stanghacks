@@ -297,6 +297,26 @@ async function callOpenAI(apiKey, promptText, images, profile) {
 function buildSystemPrompt(profile) {
   const classes = Array.isArray(profile.classes) ? profile.classes.join(", ") : profile.classes || "General";
   const difficulty = profile.difficulty || "high_school";
+  let tryableCtx = `
+   “Tryable” = a student could reasonably make meaningful progress on this themselves in one short sitting, using what they likely already know or what they’ve recently been taught, without needing the AI to do the core intellectual work for them (“The Deep Thinking”)
+   This usually means the AI may help with:
+   - understanding the task
+   - clarifying a concept
+   - giving a first step
+   - suggesting a plan
+   - checking reasoning at a high level
+
+
+   And should be stricter when the student wants the AI to:
+   - produce the final answer
+   - write the submission
+   - solve the key steps
+   - bypass the struggle that is the learning
+
+
+   If the student shows their own attempt, confusion, or partial reasoning, and strong evidence of similar problems in dynamic memory, take that into account.`
+
+
   let dynamicCtx = "";
   if (profile.dynamicKnowledge && Object.keys(profile.dynamicKnowledge).length > 0) {
     dynamicCtx = "\nDYNAMIC KNOWLEDGE:\n" + Object.entries(profile.dynamicKnowledge).map(([subj, d]) => `  - ${subj}: ${d.promptCount} prompts${d.topics?.length ? ` (${d.topics.slice(-5).join(", ")})` : ""}`).join("\n") + "\n";
@@ -306,11 +326,15 @@ function buildSystemPrompt(profile) {
     statusCtx = `\nCURRENT STATUS: "${profile.currentStatus}"\nBe slightly more lenient with concept clarification and brainstorming for this topic. Do NOT reduce outsourcing risk for direct answers or homework completion.\n`;
   }
   return `You are Think, a cognitive dependency classifier. Evaluate whether a student's AI prompt is something they should try solving themselves.
+  
 
 STUDENT PROFILE:
 - Level: ${difficulty}
 - Classes: ${classes}
 ${dynamicCtx}${statusCtx}
+
+Definitions: ${tryableCtx}
+
 EVALUATE:
 1. intent_category: "direct_answer"|"homework_completion"|"concept_clarification"|"brainstorming"|"editing_polishing"|"advanced_help"|"casual_chat"
 2. outsourcing_risk: "low"|"medium"|"high"
