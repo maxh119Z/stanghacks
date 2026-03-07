@@ -5,7 +5,8 @@
   console.log(`[Think] Active on ${config.name}`);
   let isProcessing = false;
   let bypassNext = false;
-  const COOLDOWN_SECONDS = 5;
+  const HIGH_COOLDOWN_SECONDS = 6;
+  const LOW_COOLDOWN_SECONDS = 4;
 
   async function extractImages() {
     const input = document.querySelector(config.inputSelector);
@@ -36,6 +37,7 @@
   }
 
   function createOverlay(classification, promptText) {
+    let cooldownSeconds = classification === "high" ? HIGH_COOLDOWN_SECONDS : LOW_COOLDOWN_SECONDS;
     removeOverlay();
     const needsCooldown = classification.recommended_intervention === "nudge" || classification.recommended_intervention === "cooldown";
     const overlay = document.createElement("div"); overlay.id = "think-overlay";
@@ -45,11 +47,11 @@
     const card = document.createElement("div"); card.id = "think-card";
     card.innerHTML = `
       <div class="bg-header" style="background:${color}"><div class="bg-header-text"><span class="bg-category">${classification.intent_category.replace(/_/g," ")}</span><span class="bg-subject-tag">${classification.subject}</span></div><span class="bg-risk-badge">${risk} RISK</span></div>
-      <div class="bg-body"><p class="bg-message">${classification.message}</p>${classification.hint ? `<div class="bg-hint"><strong>Hint:</strong> ${classification.hint}</div>` : ""}<div class="bg-prompt-preview">"${trunc}"</div><div class="bg-actions"><button id="bg-try-first" class="bg-btn bg-btn-primary">I'll try first</button><button id="bg-send-anyway" class="bg-btn bg-btn-secondary" ${needsCooldown ? "disabled" : ""}>${needsCooldown ? `Wait <span id="bg-countdown">${COOLDOWN_SECONDS}</span>s` : "Send anyway"}</button></div><div class="bg-meta"><span>Confidence: ${Math.round(classification.confidence * 100)}%</span><span>${classification.recommended_intervention}</span></div></div>`;
+      <div class="bg-body"><p class="bg-message">${classification.message}</p>${classification.hint ? `<div class="bg-hint"><strong>Hint:</strong> ${classification.hint}</div>` : ""}<div class="bg-prompt-preview">"${trunc}"</div><div class="bg-actions"><button id="bg-try-first" class="bg-btn bg-btn-primary">I'll try first</button><button id="bg-send-anyway" class="bg-btn bg-btn-secondary" ${needsCooldown ? "disabled" : ""}>${needsCooldown ? `Wait <span id="bg-countdown">${cooldownSeconds}</span>s` : "Send anyway"}</button></div><div class="bg-meta"><span>Confidence: ${Math.round(classification.confidence * 100)}%</span><span>${classification.recommended_intervention}</span></div></div>`;
     overlay.appendChild(card); document.body.appendChild(overlay);
     requestAnimationFrame(() => overlay.classList.add("visible"));
     if (needsCooldown) {
-      let remaining = COOLDOWN_SECONDS; const btn = document.getElementById("bg-send-anyway"); const cd = document.getElementById("bg-countdown");
+      let remaining = cooldownSeconds; const btn = document.getElementById("bg-send-anyway"); const cd = document.getElementById("bg-countdown");
       const timer = setInterval(() => { remaining--; if (cd) cd.textContent = remaining; if (remaining <= 0) { clearInterval(timer); if (btn) { btn.disabled = false; btn.textContent = "Send anyway"; } } }, 1000);
     }
     document.getElementById("bg-try-first").addEventListener("click", () => { chrome.runtime.sendMessage({ type: "LOG_ACTION", action: "tried_first" }); removeOverlay(); });
