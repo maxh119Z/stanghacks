@@ -5,78 +5,167 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Think — Dashboard</title>
   <style>
+    /* RESET & CORE */
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0a0a14; color: #e2e8f0; }
+    
+    body { 
+      min-height: 100vh; 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; 
+      background: #ffffff; 
+      color: #111; 
+      line-height: 1.4;
+    }
 
-    /* Nav */
-    .nav { display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; background: #0f0f1a; border-bottom: 1px solid rgba(255,255,255,0.05); position: sticky; top: 0; z-index: 100; }
-    .nav-brand { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-    .nav-user { display: flex; align-items: center; gap: 12px; font-size: 13px; color: #94a3b8; }
-    .nav-avatar { width: 28px; height: 28px; border-radius: 50%; }
-    .nav-user button { background: none; border: none; color: #6366f1; cursor: pointer; font-size: 12px; }
+    /* NAV - Simple Header */
+    .nav { 
+      display: flex; align-items: center; justify-content: space-between; 
+      /* padding: 10px 20px;  */
+      background: #f4f4f5; 
+      border-bottom: 1px solid #000; 
+      position: sticky; top: 0; z-index: 100; 
+    }
+    .nav-brand { font-size: 18px; text-transform: uppercase; }
+    .nav-user { display: flex; align-items: center; gap: 10px; font-size: 12px; color: #000; }
+    .nav-avatar { width: 24px; height: 24px; border: 1px solid #000; background: #ccc; border-radius: 0; }
+    .nav-user button { 
+      background: #fff; border: 1px solid #000; 
+      color: #000; cursor: pointer; 
+      /* font-size: 11px; padding: 2px 6px;  */
+     
+    }
 
-    /* Layout */
-    .container { max-width: 960px; margin: 0 auto; padding: 28px 24px; }
-    .tabs { display: flex; gap: 4px; margin-bottom: 28px; background: rgba(255,255,255,0.03); border-radius: 10px; padding: 4px; }
-    .tab { flex: 1; padding: 10px 16px; text-align: center; font-size: 13px; font-weight: 600; color: #64748b; cursor: pointer; border-radius: 8px; transition: all 0.2s; }
-    .tab.active { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+    /* LAYOUT */
+    .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+    
+    /* TABS - Browser/Folder Style */
+    .tabs { 
+      display: flex; gap: 5px; margin-bottom: 20px; 
+      background: transparent; padding: 0; border-radius: 0;
+      border-bottom: 1px solid #000;
+    }
+    .tab { 
+      flex: 0 1 auto; padding: 8px 16px; 
+      text-align: center; font-size: 13px;
+      color: #000; cursor: pointer; border-radius: 0; 
+      border: 1px solid transparent; 
+      border-bottom: none;
+      margin-bottom: -1px;
+    }
+    .tab.active { 
+      background: #fff; 
+      border: 1px solid #000; 
+      border-bottom: 1px solid #fff; 
+      color: #000; 
+    }
+    .tab:hover:not(.active) { text-decoration: underline; }
+
     .panel { display: none; }
     .panel.active { display: block; }
 
-    /* Cards */
-    .card { background: #13131f; border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; padding: 24px; margin-bottom: 20px; }
-    .card h2 { font-size: 14px; font-weight: 700; color: #a5b4fc; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; }
+    /* CARDS - Boxy */
+    .card { 
+      background: #fff; 
+      border: 1px solid #000; 
+      border-radius: 0; 
+      /* padding: 20px;  */
 
-    /* Stats */
-    .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
-    .stat-card { background: #13131f; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 18px; text-align: center; }
-    .stat-card .num { font-size: 32px; font-weight: 700; color: #a5b4fc; }
-    .stat-card .label { font-size: 10px; color: #64748b; text-transform: uppercase; margin-top: 4px; }
+      margin-bottom: 20px; 
+    }
+    .card h2 { 
+      font-size: 14px; color: #000; 
+      margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; 
+      border-bottom: 1px solid #eee; padding-bottom: 5px;
+    }
 
-    /* Bar chart */
-    .bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 160px; padding-top: 10px; }
-    .bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
-    .bar { width: 100%; min-height: 2px; border-radius: 4px 4px 0 0; transition: height 0.3s; }
-    .bar.nudged { background: linear-gradient(135deg, #f59e0b, #d97706); }
-    .bar.clean { background: linear-gradient(135deg, #10b981, #059669); }
-    .bar-label { font-size: 10px; color: #64748b; }
-    .bar-legend { display: flex; gap: 16px; margin-top: 12px; justify-content: center; }
-    .bar-legend span { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #94a3b8; }
-    .bar-legend .dot { width: 8px; height: 8px; border-radius: 2px; }
+    /* STATS - Grid */
+    .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 15px; margin-bottom: 20px; }
+    .stat-card { 
+      background: #fff; 
+      border: 1px solid #000; 
+      border-radius: 0; 
+      /* padding: 15px;  */
+      text-align: center; 
+    }
+    .stat-card .num { font-size: 28px; color: #000; }
+    .stat-card .label { font-size: 10px; color: #555; text-transform: uppercase; margin-top: 5px; }
 
-    /* Breakdown bars */
-    .cat-row { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    /* BAR CHART - Flat Colors */
+    .bar-chart { display: flex; align-items: flex-end; gap: 5px; height: 160px; padding-top: 10px; border-bottom: 1px solid #000; }
+    .bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+    .bar { width: 100%; min-height: 1px; border-radius: 0; transition: height 0.3s; border-bottom: 0; }
+    .bar.nudged { background: #c4c4c4; /* Light Gray */ }
+    .bar.clean { background: #000000; /* Black */ }
+    .bar-label { font-size: 10px; color: #000; }
+    
+    .bar-legend { display: flex; gap: 15px; margin-top: 10px; justify-content: center; }
+    .bar-legend span { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #000; }
+    .bar-legend .dot { width: 10px; height: 10px; border-radius: 0; border: 1px solid #000; }
+
+    /* LISTS / BARS */
+    .cat-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid #eee; }
     .cat-row:last-child { border-bottom: none; }
-    .cat-name { font-size: 13px; width: 160px; text-transform: capitalize; }
-    .cat-bar-bg { flex: 1; height: 8px; background: rgba(255,255,255,0.04); border-radius: 4px; overflow: hidden; }
-    .cat-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #6366f1, #8b5cf6); }
-    .cat-count { font-size: 12px; color: #94a3b8; width: 40px; text-align: right; }
+    .cat-name { font-size: 12px; width: 150px; text-transform: capitalize;}
+    .cat-bar-bg { flex: 1; height: 10px; background: #eee; border: 1px solid #ccc; border-radius: 0; overflow: hidden; }
+    .cat-bar-fill { height: 100%; border-radius: 0; background: #000; }
+    .cat-count { font-size: 12px; color: #000; width: 30px; text-align: right;}
 
-    /* Forms */
-    .form-group { margin-bottom: 18px; }
-    .form-group label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8; margin-bottom: 6px; }
-    input, textarea, select { width: 100%; padding: 11px 13px; background: #1a1a2e; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; color: #e2e8f0; font-size: 14px; font-family: inherit; outline: none; }
-    input:focus, textarea:focus, select:focus { border-color: #6366f1; }
-    textarea { resize: vertical; min-height: 70px; }
-    .help { font-size: 11px; color: #475569; margin-top: 5px; }
+    /* FORMS - Default Inputs */
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-size: 11px;  text-transform: uppercase; color: #000; margin-bottom: 5px; }
+    input, textarea, select { 
+      width: 100%; padding: 8px; 
+      background: #fff; 
+      border: 1px solid #000; 
+      border-radius: 0; 
+      color: #000; font-size: 13px; font-family: inherit; outline: none; 
+    }
+    input:focus, textarea:focus, select:focus { background: #fafafa; outline: 1px solid #000; }
+    textarea { resize: vertical; min-height: 60px; }
+    .help { font-size: 11px; color: #555; margin-top: 4px; }
 
-    /* Knowledge */
-    .knowledge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
-    .knowledge-chip { background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.15); border-radius: 10px; padding: 14px; }
-    .knowledge-chip h4 { font-size: 14px; font-weight: 700; color: #c7d2fe; text-transform: capitalize; }
-    .knowledge-chip .kc { font-size: 12px; color: #818cf8; margin-top: 2px; }
-    .knowledge-chip .kt { font-size: 11px; color: #64748b; margin-top: 6px; line-height: 1.6; }
+    /* KNOWLEDGE GRID */
+    .knowledge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+    .knowledge-chip { 
+      background: #fff; 
+      border: 1px solid #000; 
+      border-radius: 0; 
+      padding: 12px; 
+    }
+    .knowledge-chip h4 { font-size: 13px;  color: #000; text-transform: capitalize; margin-bottom: 4px; }
+    .knowledge-chip .kc { font-size: 11px; color: #000;  }
+    .knowledge-chip .kt { font-size: 10px; color: #555; margin-top: 4px; line-height: 1.4; }
 
-    .btn { display: inline-block; padding: 11px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; transition: all 0.2s; }
-    .btn:hover { box-shadow: 0 4px 15px rgba(99,102,241,0.4); transform: translateY(-1px); }
+    /* BUTTONS */
+    .btn { 
+      display: inline-block; padding: 10px 20px; 
+      border-radius: 0; 
+      font-size: 13px; cursor: pointer; 
+      border: 1px solid #000; 
+      background: #000; color: white; 
+      text-transform: uppercase;
+      transition: none; 
+    }
+    .btn:hover { background: #333; }
 
-    .empty { text-align: center; padding: 36px 20px; color: #475569; }
-    .empty .icon { font-size: 36px; margin-bottom: 10px; }
+    /* UTILS */
+    .empty { text-align: center; padding: 30px 20px; color: #777; font-style: italic; border: 1px dashed #ccc; }
+    .empty .icon { font-size: 24px; margin-bottom: 5px; display: block; }
 
-    .toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 20px; background: #10b981; color: white; border-radius: 8px; font-size: 13px; font-weight: 600; opacity: 0; transform: translateY(10px); transition: all 0.3s; z-index: 200; }
+    .toast { 
+      position: fixed; bottom: 20px; right: 20px; 
+      /* padding: 10px 20px;  */
+      background: #000; color: white; 
+      border: 1px solid #000;
+      border-radius: 0; 
+      font-size: 12px; 
+      opacity: 0; transform: translateY(10px); transition: opacity 0.3s; z-index: 200; 
+    }
     .toast.show { opacity: 1; transform: translateY(0); }
 
-    @media (max-width: 640px) { .stats-row { grid-template-columns: repeat(2,1fr); } .container { padding: 20px 16px; } }
+    @media (max-width: 640px) { 
+      .stats-row { grid-template-columns: repeat(2,1fr); } 
+      /* .container { padding: 10px; }  */
+    }
   </style>
 </head>
 <body>
@@ -96,7 +185,6 @@
       <div class="tab" data-panel="knowledge">Knowledge Map</div>
     </div>
 
-    <!-- ═══ Overview ═══ -->
     <div id="overview" class="panel active">
       <div class="stats-row">
         <div class="stat-card"><div class="num" id="oTotal">-</div><div class="label">Total Prompts</div></div>
@@ -109,24 +197,23 @@
         <h2>Last 7 Days</h2>
         <div class="bar-chart" id="weekChart"></div>
         <div class="bar-legend">
-          <span><span class="dot" style="background:#10b981"></span> Clean</span>
-          <span><span class="dot" style="background:#f59e0b"></span> Nudged</span>
+          <span><span class="dot" style="background:#000"></span> Clean</span>
+          <span><span class="dot" style="background:#e4e4e7"></span> Nudged</span>
         </div>
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div class="card">
           <h2>Categories (7 days)</h2>
-          <div id="catBreakdown"><div class="empty"><div class="icon">📊</div>No data yet</div></div>
+          <div id="catBreakdown"><div class="empty"><div class="icon"></div>No data yet</div></div>
         </div>
         <div class="card">
           <h2>Subjects (7 days)</h2>
-          <div id="subjBreakdown"><div class="empty"><div class="icon">📚</div>No data yet</div></div>
+          <div id="subjBreakdown"><div class="empty"><div class="icon"></div>No data yet</div></div>
         </div>
       </div>
     </div>
 
-    <!-- ═══ Profile ═══ -->
     <div id="profile" class="panel">
       <div class="card">
         <h2>Your Profile</h2>
@@ -145,7 +232,7 @@
             <option value="middle_school">Middle School</option>
             <option value="high_school">High School</option>
             <option value="ap_honors">AP / Honors</option>
-            <option value="college">College</option>
+            <option value="college">College / University</option>
           </select>
         </div>
         <div class="form-group">
@@ -160,13 +247,12 @@
       </div>
     </div>
 
-    <!-- ═══ Knowledge Map ═══ -->
     <div id="knowledge" class="panel">
       <div class="card">
         <h2>Dynamic Knowledge Map</h2>
         <p class="help" style="margin-bottom: 16px;">Think learns what subjects and topics you ask about. This builds automatically over time.</p>
         <div class="knowledge-grid" id="knowledgeGrid">
-          <div class="empty"><div class="icon">🧩</div>Your knowledge map builds as you use AI tools.</div>
+          <div class="empty">Dynamic knowlege editing</div>
         </div>
       </div>
     </div>

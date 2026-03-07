@@ -23,7 +23,8 @@
       "matches": [
         "https://chatgpt.com/*",
         "https://chat.openai.com/*",
-        "https://claude.ai/*",
+        "https://claude.ai/chat/*",
+        "https://claude.ai/new/*",
         "https://gemini.google.com/*"
       ],
       "js": ["config.js", "content.js"],
