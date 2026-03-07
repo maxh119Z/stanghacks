@@ -1,4 +1,4 @@
-# 🧠 BrainGuard — AI Dependency Monitor
+# brainguard
 
 **Like screentime, but for your brain.**
 
