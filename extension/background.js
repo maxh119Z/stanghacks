@@ -298,7 +298,7 @@ function buildSystemPrompt(profile) {
   const classes = Array.isArray(profile.classes) ? profile.classes.join(", ") : profile.classes || "General";
   const difficulty = profile.difficulty || "high_school";
   let tryableCtx = `
-   “Tryable” = a student could reasonably make meaningful progress on this themselves in one short sitting, using what they likely already know or what they’ve recently been taught, without needing the AI to do the core intellectual work for them (“The Deep Thinking”)
+   “Tryable” = a student could reasonably make meaningful progress on this themselves in one reasonable sitting given the context of the problem, using what they likely already know or what they’ve recently been taught, without needing the AI to do the core intellectual work for them (“The Deep Thinking”)
    This usually means the AI may help with:
    - understanding the task
    - clarifying a concept

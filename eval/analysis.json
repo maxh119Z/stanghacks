@@ -1,0 +1,21 @@
+{
+  "timestamp": "2026-03-07T23:09:35.950Z",
+  "total": 35,
+  "overall": {
+    "exact": 14,
+    "close": 31,
+    "cohenKappa": 0.09371146732429111
+  },
+  "withImage": {
+    "n": 14,
+    "exact": 7,
+    "cohenKappa": 0.20325203252032517
+  },
+  "textOnly": {
+    "n": 21,
+    "exact": 7,
+    "cohenKappa": 0.029702970297029656
+  },
+  "dangerousMisses": 1,
+  "falseFlags": 3
+}
