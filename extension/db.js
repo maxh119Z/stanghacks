@@ -44,11 +44,53 @@ export async function addDoc(collectionPath, data, idToken) {
   return await res.json();
 }
 
+export async function deleteDoc(path, idToken) {
+  const res = await fetch(`${FIRESTORE_URL}/${path}`, { method: "DELETE", headers: { Authorization: `Bearer ${idToken}` } });
+  if (!res.ok && res.status !== 404) throw new Error(`DELETE ${path}: ${res.status}`);
+}
+
+// ── List docs in a subcollection ─────────────────────────────
+
+export async function listDocs(collectionPath, idToken, pageSize = 100) {
+  const res = await fetch(`${FIRESTORE_URL}/${collectionPath}?pageSize=${pageSize}`, {
+    headers: { Authorization: `Bearer ${idToken}` },
+  });
+  if (!res.ok) throw new Error(`LIST ${collectionPath}: ${res.status}`);
+  const data = await res.json();
+  return (data.documents || []).map((doc) => ({
+    id: doc.name.split("/").pop(),
+    ...fromDoc(doc),
+  }));
+}
+
+// ── Think-specific operations ────────────────────────────────
+
 export async function getUserProfile(uid, idToken) { return await getDoc(`users/${uid}`, idToken); }
 export async function saveUserProfile(uid, idToken, profile) { return await setDoc(`users/${uid}`, profile, idToken); }
-export async function logPrompt(uid, idToken, promptData) { return await addDoc(`users/${uid}/prompts`, { ...promptData, timestamp: new Date().toISOString() }, idToken); }
+
+export async function logPrompt(uid, idToken, promptData) {
+  return await addDoc(`users/${uid}/prompts`, { ...promptData, timestamp: new Date().toISOString() }, idToken);
+}
+
 export async function getDailyStats(uid, idToken, dateStr) { return await getDoc(`users/${uid}/dailyStats/${dateStr}`, idToken); }
 export async function saveDailyStats(uid, idToken, dateStr, stats) { return await setDoc(`users/${uid}/dailyStats/${dateStr}`, stats, idToken); }
+
+// List recent prompts for history view
+export async function listPrompts(uid, idToken, limit = 50) {
+  const prompts = await listDocs(`users/${uid}/prompts`, idToken, limit);
+  // Sort by timestamp descending (newest first)
+  return prompts.sort((a, b) => (b.timestamp || "").localeCompare(a.timestamp || ""));
+}
+
+// Reset daily stats for last N days
+export async function resetDailyStats(uid, idToken, days = 30) {
+  const empty = { total: 0, nudged: 0, allowed: 0, sentAnyway: 0, triedFirst: 0, categories: {}, subjects: {}, sites: {} };
+  for (let i = 0; i < days; i++) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const ds = d.toISOString().split("T")[0];
+    try { await deleteDoc(`users/${uid}/dailyStats/${ds}`, idToken); } catch (e) { /* ignore */ }
+  }
+}
 
 export async function updateDynamicProfile(uid, idToken, updates) {
   const existing = (await getUserProfile(uid, idToken)) || {};

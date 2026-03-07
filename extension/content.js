@@ -34,6 +34,25 @@
     return results;
   }
 
+  // ── Loading Indicator ───────────────────────────────────────
+
+  function showLoading() {
+    removeOverlay();
+    const overlay = document.createElement("div");
+    overlay.id = "think-overlay";
+    const card = document.createElement("div");
+    card.id = "think-card";
+    card.innerHTML = `
+      <div class="bg-body" style="text-align:center; padding:32px 20px;">
+        <p class="bg-message" style="margin:0;">Analyzing prompt...</p>
+        <div class="bg-meta" style="justify-content:center; margin-top:8px;"><span>This takes a moment</span></div>
+      </div>
+    `;
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add("visible"));
+  }
+
   // ── Overlay UI ──────────────────────────────────────────────
 
   function createOverlay(classification, promptText) {
@@ -90,7 +109,7 @@
       const timer = setInterval(() => {
         remaining--;
         if (cd) cd.textContent = remaining;
-        if (remaining <= 0) { clearInterval(timer); btn.disabled = false; btn.textContent = "Send anyway"; }
+        if (remaining <= 0) { clearInterval(timer); if (btn) { btn.disabled = false; btn.textContent = "Send anyway"; } }
       }, 1000);
     }
 
@@ -99,20 +118,33 @@
       removeOverlay();
     });
     document.getElementById("bg-send-anyway").addEventListener("click", () => {
-      if (document.getElementById("bg-send-anyway").disabled) return;
+      const btn = document.getElementById("bg-send-anyway");
+      if (btn && btn.disabled) return;
       chrome.runtime.sendMessage({ type: "LOG_ACTION", action: "sent_anyway" });
       removeOverlay();
       bypassNext = true;
       clickSend();
     });
 
-    const escH = (e) => { if (e.key === "Escape") { chrome.runtime.sendMessage({ type: "LOG_ACTION", action: "tried_first" }); removeOverlay(); document.removeEventListener("keydown", escH); } };
+    const escH = (e) => {
+      if (e.key === "Escape") {
+        chrome.runtime.sendMessage({ type: "LOG_ACTION", action: "tried_first" });
+        removeOverlay();
+        document.removeEventListener("keydown", escH);
+      }
+    };
     document.addEventListener("keydown", escH);
   }
 
   function removeOverlay() { const el = document.getElementById("think-overlay"); if (el) el.remove(); }
   function getPromptText() { const el = document.querySelector(config.inputSelector); return el ? config.getInputText(el) : ""; }
-  function clickSend() { const btn = document.querySelector(config.sendButtonSelector); if (btn) btn.click(); }
+  function clickSend() {
+    // Small delay to ensure bypass flag is set before click fires
+    setTimeout(() => {
+      const btn = document.querySelector(config.sendButtonSelector);
+      if (btn) btn.click();
+    }, 50);
+  }
 
   // ── Prompt Interception ─────────────────────────────────────
 
@@ -126,20 +158,43 @@
     e.stopImmediatePropagation();
     isProcessing = true;
 
+    // Show loading immediately so user knows something is happening
+    showLoading();
+
     try {
       const images = await extractImages();
       const result = await new Promise((resolve, reject) => {
         chrome.runtime.sendMessage(
           { type: "CLASSIFY_PROMPT", prompt: text, images, site: window.location.hostname },
-          (r) => { if (chrome.runtime.lastError) reject(chrome.runtime.lastError); else resolve(r); }
+          (r) => {
+            if (chrome.runtime.lastError) reject(chrome.runtime.lastError);
+            else resolve(r);
+          }
         );
       });
 
-      if (result.error) { console.warn("[Think]", result.error); bypassNext = true; clickSend(); return; }
-      if (result.recommended_intervention === "allow") { bypassNext = true; clickSend(); }
-      else { createOverlay(result, text); }
-    } catch (err) { console.error("[Think]", err); bypassNext = true; clickSend(); }
-    finally { isProcessing = false; }
+      if (result.error) {
+        console.warn("[Think]", result.error);
+        removeOverlay();
+        bypassNext = true;
+        clickSend();
+        return;
+      }
+      if (result.recommended_intervention === "allow") {
+        removeOverlay();
+        bypassNext = true;
+        clickSend();
+      } else {
+        createOverlay(result, text);
+      }
+    } catch (err) {
+      console.error("[Think]", err);
+      removeOverlay();
+      bypassNext = true;
+      clickSend();
+    } finally {
+      isProcessing = false;
+    }
   }
 
   // ── Binding ─────────────────────────────────────────────────
@@ -150,7 +205,10 @@
     const btn = document.querySelector(config.sendButtonSelector);
     if (btn && !btn.dataset.bg) { btn.addEventListener("click", handlePromptSubmit, true); btn.dataset.bg = "1"; }
     const inp = document.querySelector(config.inputSelector);
-    if (inp && !inp.dataset.bg) { inp.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) handlePromptSubmit(e); }, true); inp.dataset.bg = "1"; }
+    if (inp && !inp.dataset.bg) {
+      inp.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) handlePromptSubmit(e); }, true);
+      inp.dataset.bg = "1";
+    }
   }
 
   new MutationObserver(attach).observe(document.body, { childList: true, subtree: true });

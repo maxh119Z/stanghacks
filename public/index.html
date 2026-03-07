@@ -7,56 +7,65 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: #1e1e1e; color: #d4d4d4; line-height: 1.5; }
-
     .nav { display: flex; align-items: center; justify-content: space-between; padding: 12px 28px; background: #252526; border-bottom: 1px solid #3e3e42; }
     .nav-brand { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #d4d4d4; }
     .nav-right { display: flex; align-items: center; gap: 12px; font-size: 13px; color: #969696; }
     .nav-right img { width: 28px; height: 28px; border: 1px solid #4a4a4f; }
     .nav-right button { background: #2d2d30; border: 1px solid #3e3e42; color: #969696; cursor: pointer; font-size: 12px; padding: 5px 12px; }
     .nav-right button:hover { background: #333336; color: #d4d4d4; }
-
     .auth-screen { max-width: 380px; margin: 100px auto; text-align: center; padding: 32px; background: #252526; border: 1px solid #3e3e42; }
     .auth-screen h1 { font-size: 18px; margin-bottom: 8px; color: #d4d4d4; text-transform: uppercase; letter-spacing: 0.5px; }
     .auth-screen p { color: #6a6a6a; margin-bottom: 24px; font-size: 13px; }
     .google-btn { display: inline-flex; align-items: center; gap: 10px; padding: 10px 20px; background: #fff; color: #333; font-size: 13px; font-weight: 600; border: none; cursor: pointer; }
     .google-btn:hover { background: #f0f0f0; }
     .google-btn svg { width: 18px; height: 18px; }
-
     .container { max-width: 960px; margin: 0 auto; padding: 24px; }
-
+    .tabs { display: flex; gap: 0; margin-bottom: 24px; border-bottom: 1px solid #3e3e42; }
+    .tab { padding: 8px 16px; font-size: 11px; font-weight: 600; color: #6a6a6a; cursor: pointer; border: 1px solid transparent; border-bottom: none; margin-bottom: -1px; text-transform: uppercase; letter-spacing: 0.3px; }
+    .tab.active { background: #1e1e1e; border-color: #3e3e42; border-bottom-color: #1e1e1e; color: #d4d4d4; }
+    .tab:hover:not(.active) { color: #969696; }
+    .panel { display: none; } .panel.active { display: block; }
     .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 16px; }
     .stat-card { background: #252526; border: 1px solid #3e3e42; padding: 18px; text-align: center; }
     .stat-card .num { font-size: 30px; font-weight: 700; color: #d4d4d4; }
     .stat-card .label { font-size: 11px; color: #6a6a6a; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
-
     .card { background: #252526; border: 1px solid #3e3e42; padding: 20px; margin-bottom: 16px; }
     .card h2 { font-size: 11px; font-weight: 600; color: #969696; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid #3e3e42; text-transform: uppercase; letter-spacing: 0.5px; }
-
     .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 140px; padding-top: 8px; border-bottom: 1px solid #3e3e42; }
     .bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
-    .bar { width: 100%; min-height: 1px; transition: height 0.3s; }
-    .bar.nudged { background: #3e3e42; }
-    .bar.clean { background: #4ec9b0; }
+    .bar { width: 100%; min-height: 1px; transition: height 0.3s; } .bar.nudged { background: #3e3e42; } .bar.clean { background: #4ec9b0; }
     .bar-label { font-size: 10px; color: #6a6a6a; }
     .bar-legend { display: flex; gap: 16px; margin-top: 10px; justify-content: center; }
     .bar-legend span { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #969696; }
     .bar-legend .dot { width: 8px; height: 8px; border: 1px solid #4a4a4f; }
-
     .cat-row { display: flex; align-items: center; gap: 12px; padding: 7px 0; border-bottom: 1px solid #2d2d30; }
     .cat-row:last-child { border-bottom: none; }
     .cat-name { font-size: 13px; width: 150px; text-transform: capitalize; color: #d4d4d4; }
     .cat-bar-bg { flex: 1; height: 8px; background: #2d2d30; overflow: hidden; }
     .cat-bar-fill { height: 100%; background: #4ec9b0; }
     .cat-count { font-size: 12px; color: #969696; width: 36px; text-align: right; }
-
     .knowledge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
     .knowledge-chip { background: #2d2d30; border: 1px solid #3e3e42; padding: 14px; }
     .knowledge-chip h4 { font-size: 13px; font-weight: 600; color: #d4d4d4; text-transform: capitalize; margin-bottom: 4px; }
     .knowledge-chip .kc { font-size: 11px; color: #4ec9b0; }
     .knowledge-chip .kt { font-size: 11px; color: #6a6a6a; margin-top: 4px; }
-
+    .prompt-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .prompt-table th { text-align: left; padding: 8px 10px; color: #969696; text-transform: uppercase; letter-spacing: 0.3px; font-size: 10px; border-bottom: 1px solid #3e3e42; }
+    .prompt-table td { padding: 8px 10px; border-bottom: 1px solid #2d2d30; color: #d4d4d4; vertical-align: top; }
+    .prompt-table tr:hover td { background: #2d2d30; }
+    .prompt-text { max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tag { display: inline-block; padding: 2px 6px; font-size: 10px; font-weight: 600; border: 1px solid #3e3e42; color: #969696; }
+    .tag.risk-high { border-color: #f14c4c; color: #f14c4c; }
+    .tag.risk-medium { border-color: #cca700; color: #cca700; }
+    .tag.risk-low { border-color: #4ec9b0; color: #4ec9b0; }
+    .btn { display: inline-block; padding: 8px 16px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; background: #4ec9b0; color: #1e1e1e; text-transform: uppercase; letter-spacing: 0.3px; }
+    .btn:hover { background: #3db89f; }
+    .btn-outline { background: none; color: #969696; border: 1px solid #3e3e42; }
+    .btn-outline:hover { background: #2d2d30; color: #d4d4d4; }
+    .toolbar { display: flex; gap: 8px; margin-bottom: 16px; }
     .hidden { display: none !important; }
     .muted { color: #6a6a6a; font-size: 13px; font-style: italic; }
+    .status-badge { font-size: 12px; color: #4ec9b0; margin-bottom: 16px; padding: 6px 10px; border: 1px solid #3e3e42; background: #2d2d30; display: inline-block; }
     @media (max-width: 700px) { .stats-row { grid-template-columns: repeat(2,1fr); } .two-col { grid-template-columns: 1fr !important; } }
   </style>
 </head>
@@ -80,25 +89,32 @@
   </div>
 
   <div id="dashView" class="container hidden">
-    <div class="stats-row">
-      <div class="stat-card"><div class="num" id="sTotal">-</div><div class="label">Total Prompts</div></div>
-      <div class="stat-card"><div class="num" id="sNudged">-</div><div class="label">Nudged</div></div>
-      <div class="stat-card"><div class="num" id="sClean">-</div><div class="label">Clean</div></div>
-      <div class="stat-card"><div class="num" id="sRate">-</div><div class="label">Nudge Rate</div></div>
+    <div id="statusDisplay"></div>
+    <div class="tabs">
+      <div class="tab active" data-panel="wOverview">Overview</div>
+      <div class="tab" data-panel="wHistory">History</div>
     </div>
-    <div class="card">
-      <h2>Last 7 Days</h2>
-      <div class="bar-chart" id="weekChart"></div>
-      <div class="bar-legend">
-        <span><span class="dot" style="background:#4ec9b0"></span> Clean</span>
-        <span><span class="dot" style="background:#3e3e42"></span> Nudged</span>
+
+    <div id="wOverview" class="panel active">
+      <div class="stats-row">
+        <div class="stat-card"><div class="num" id="sTotal">-</div><div class="label">Total Prompts</div></div>
+        <div class="stat-card"><div class="num" id="sNudged">-</div><div class="label">Nudged</div></div>
+        <div class="stat-card"><div class="num" id="sClean">-</div><div class="label">Clean</div></div>
+        <div class="stat-card"><div class="num" id="sRate">-</div><div class="label">Nudge Rate</div></div>
       </div>
+      <div class="card"><h2>Last 7 Days</h2><div class="bar-chart" id="weekChart"></div><div class="bar-legend"><span><span class="dot" style="background:#4ec9b0"></span> Clean</span><span><span class="dot" style="background:#3e3e42"></span> Nudged</span></div></div>
+      <div class="two-col" style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+        <div class="card"><h2>Categories (7 days)</h2><div id="wCats" class="muted">Loading...</div></div>
+        <div class="card"><h2>Subjects</h2><div id="wSubjects" class="muted">Loading...</div></div>
+      </div>
+      <div class="card"><h2>Per-Site Usage</h2><div id="wSites" class="muted">Loading...</div></div>
+      <div class="card"><h2>Knowledge Map</h2><div class="knowledge-grid" id="wKnowledge"><span class="muted">Loading...</span></div></div>
     </div>
-    <div class="two-col" style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
-      <div class="card"><h2>Categories (7 days)</h2><div id="wCats" class="muted">Loading...</div></div>
-      <div class="card"><h2>Subjects</h2><div id="wSubjects" class="muted">Loading...</div></div>
+
+    <div id="wHistory" class="panel">
+      <div class="toolbar"><button class="btn btn-outline" id="wExportCsv">Export CSV</button></div>
+      <div class="card" style="overflow-x:auto;"><h2>Recent Prompts</h2><div id="wHistoryContent"><span class="muted">Loading...</span></div></div>
     </div>
-    <div class="card"><h2>Knowledge Map</h2><div class="knowledge-grid" id="wKnowledge"><span class="muted">Loading...</span></div></div>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -114,11 +130,26 @@
       appId: "1:1057477643029:web:eecee0d8a2432d924df71c",
     });
     const auth = firebase.auth();
-    const db = firebase.firestore();
+    const fdb = firebase.firestore();
     const provider = new firebase.auth.GoogleAuthProvider();
 
     document.getElementById("googleBtn").addEventListener("click", () => auth.signInWithPopup(provider));
     document.getElementById("signoutBtn").addEventListener("click", () => auth.signOut());
+
+    // Tabs
+    document.querySelectorAll(".tab").forEach(t => {
+      t.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+        document.querySelectorAll(".panel").forEach(x => x.classList.remove("active"));
+        t.classList.add("active");
+        document.getElementById(t.dataset.panel).classList.add("active");
+        if (t.dataset.panel === "wHistory" && !historyLoaded) loadHistory(currentUid);
+      });
+    });
+
+    let currentUid = null;
+    let historyLoaded = false;
+    let allPrompts = [];
 
     auth.onAuthStateChanged(async (user) => {
       if (user) {
@@ -127,6 +158,7 @@
         document.getElementById("navName").textContent = user.displayName || user.email;
         document.getElementById("signoutBtn").classList.remove("hidden");
         if (user.photoURL) { const img = document.getElementById("navPhoto"); img.src = user.photoURL; img.classList.remove("hidden"); }
+        currentUid = user.uid;
         await loadDashboard(user.uid);
       } else {
         document.getElementById("authView").classList.remove("hidden");
@@ -139,17 +171,18 @@
 
     async function loadDashboard(uid) {
       let total = 0, nudged = 0, clean = 0;
-      const cats = {}, subjs = {}, dailyData = [];
+      const cats = {}, subjs = {}, sites = {}, dailyData = [];
       for (let i = 0; i < 7; i++) {
         const d = new Date(); d.setDate(d.getDate() - i);
         const ds = d.toISOString().split("T")[0];
         try {
-          const doc = await db.collection("users").doc(uid).collection("dailyStats").doc(ds).get();
+          const doc = await fdb.collection("users").doc(uid).collection("dailyStats").doc(ds).get();
           if (doc.exists) {
             const x = doc.data();
             total += x.total || 0; nudged += x.nudged || 0; clean += x.allowed || 0;
             for (const [k, v] of Object.entries(x.categories || {})) cats[k] = (cats[k] || 0) + v;
             for (const [k, v] of Object.entries(x.subjects || {})) subjs[k] = (subjs[k] || 0) + v;
+            for (const [k, v] of Object.entries(x.sites || {})) sites[k] = (sites[k] || 0) + v;
             dailyData.push({ date: ds, nudged: x.nudged || 0, clean: x.allowed || 0 });
           } else { dailyData.push({ date: ds, nudged: 0, clean: 0 }); }
         } catch (e) { dailyData.push({ date: ds, nudged: 0, clean: 0 }); }
@@ -161,28 +194,32 @@
       renderWeekChart(dailyData);
       renderBreakdown("wCats", cats);
       renderBreakdown("wSubjects", subjs);
-      const profileDoc = await db.collection("users").doc(uid).get();
-      if (profileDoc.exists) renderKnowledge(profileDoc.data().dynamicKnowledge || {});
+      renderBreakdown("wSites", sites);
+
+      const profileDoc = await fdb.collection("users").doc(uid).get();
+      if (profileDoc.exists) {
+        const p = profileDoc.data();
+        renderKnowledge(p.dynamicKnowledge || {});
+        if (p.currentStatus) {
+          document.getElementById("statusDisplay").innerHTML = `<div class="status-badge">Current: ${p.currentStatus}</div>`;
+        }
+      }
     }
 
     function renderWeekChart(dailyData) {
-      const chart = document.getElementById("weekChart");
-      chart.innerHTML = "";
+      const chart = document.getElementById("weekChart"); chart.innerHTML = "";
       const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
       const ordered = [...dailyData].reverse();
-      const maxVal = Math.max(...ordered.map(d => (d.nudged || 0) + (d.clean || 0)), 1);
+      const maxVal = Math.max(...ordered.map(d => (d.nudged||0) + (d.clean||0)), 1);
       ordered.forEach((day) => {
         const g = document.createElement("div"); g.className = "bar-group";
         const cBar = document.createElement("div"); cBar.className = "bar clean";
-        cBar.style.height = Math.max(1, ((day.clean || 0) / maxVal) * 120) + "px";
-        cBar.title = "Clean: " + (day.clean || 0);
+        cBar.style.height = Math.max(1, ((day.clean||0) / maxVal) * 120) + "px"; cBar.title = "Clean: " + (day.clean||0);
         const nBar = document.createElement("div"); nBar.className = "bar nudged";
-        nBar.style.height = Math.max(1, ((day.nudged || 0) / maxVal) * 120) + "px";
-        nBar.title = "Nudged: " + (day.nudged || 0);
+        nBar.style.height = Math.max(1, ((day.nudged||0) / maxVal) * 120) + "px"; nBar.title = "Nudged: " + (day.nudged||0);
         const lbl = document.createElement("div"); lbl.className = "bar-label";
         const d = new Date(day.date); lbl.textContent = isNaN(d) ? "?" : days[d.getDay()];
-        g.appendChild(cBar); g.appendChild(nBar); g.appendChild(lbl);
-        chart.appendChild(g);
+        g.appendChild(cBar); g.appendChild(nBar); g.appendChild(lbl); chart.appendChild(g);
       });
     }
 
@@ -200,6 +237,36 @@
       if (!entries.length) { el.innerHTML = '<span class="muted">Populates as you use AI tools</span>'; return; }
       el.innerHTML = entries.sort((a, b) => (b[1].promptCount||0) - (a[1].promptCount||0)).map(([s, d]) => `<div class="knowledge-chip"><h4>${s}</h4><div class="kc">${d.promptCount||0} prompts</div>${d.topics?.length ? `<div class="kt">${d.topics.slice(-3).join(", ")}</div>` : ""}</div>`).join("");
     }
+
+    async function loadHistory(uid) {
+      historyLoaded = true;
+      try {
+        const snap = await fdb.collection("users").doc(uid).collection("prompts").orderBy("timestamp", "desc").limit(100).get();
+        allPrompts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderHistory(allPrompts);
+      } catch (e) { document.getElementById("wHistoryContent").innerHTML = '<span class="muted">Could not load history</span>'; }
+    }
+
+    function renderHistory(prompts) {
+      const el = document.getElementById("wHistoryContent");
+      if (!prompts.length) { el.innerHTML = '<span class="muted">No prompts logged yet</span>'; return; }
+      el.innerHTML = `<table class="prompt-table"><thead><tr><th>Time</th><th>Prompt</th><th>Category</th><th>Subject</th><th>Risk</th><th>Site</th></tr></thead><tbody>${prompts.map(p => {
+        const time = p.timestamp ? new Date(p.timestamp).toLocaleString([], { month:"short", day:"numeric", hour:"2-digit", minute:"2-digit" }) : "?";
+        const rc = p.outsourcingRisk==="high"?"risk-high":p.outsourcingRisk==="medium"?"risk-medium":"risk-low";
+        return `<tr><td style="white-space:nowrap;font-size:11px;color:#6a6a6a;">${time}</td><td class="prompt-text" title="${(p.text||"").replace(/"/g,'&quot;')}">${p.text||""}</td><td><span class="tag">${(p.intentCategory||"").replace(/_/g," ")}</span></td><td style="text-transform:capitalize;">${p.subject||""}</td><td><span class="tag ${rc}">${(p.outsourcingRisk||"").toUpperCase()}</span></td><td style="font-size:11px;color:#6a6a6a;">${(p.site||"").replace("www.","").split(".")[0]}</td></tr>`;
+      }).join("")}</tbody></table>`;
+    }
+
+    document.getElementById("wExportCsv").addEventListener("click", () => {
+      if (!allPrompts.length) return;
+      const headers = ["timestamp","text","intentCategory","outsourcingRisk","confidence","subject","intervention","site"];
+      const rows = allPrompts.map(p => headers.map(h => { let v = String(p[h]||""); if (v.includes(",") || v.includes('"') || v.includes("\n")) v = '"' + v.replace(/"/g,'""') + '"'; return v; }).join(","));
+      const csv = [headers.join(","), ...rows].join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = `think-export-${new Date().toISOString().split("T")[0]}.csv`;
+      a.click(); URL.revokeObjectURL(url);
+    });
   </script>
 </body>
 </html>

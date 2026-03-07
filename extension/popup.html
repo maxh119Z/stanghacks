@@ -4,25 +4,14 @@
   <meta charset="UTF-8">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { 
-      width: 320px; 
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; 
-      background: #1e1e1e; 
-      color: #d4d4d4;
-    }
+    body { width: 320px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: #1e1e1e; color: #d4d4d4; }
 
     .header { padding: 14px 16px; background: #252526; border-bottom: 1px solid #3e3e42; }
     .header h1 { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #d4d4d4; }
     .header p { font-size: 11px; color: #6a6a6a; margin-top: 2px; }
 
     .auth-section { padding: 14px 16px; border-bottom: 1px solid #3e3e42; }
-
-    .google-btn {
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      width: 100%; padding: 9px; 
-      background: #fff; color: #333; font-size: 12px; font-weight: 600;
-      border: none; cursor: pointer;
-    }
+    .google-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 9px; background: #fff; color: #333; font-size: 12px; font-weight: 600; border: none; cursor: pointer; }
     .google-btn:hover { background: #f0f0f0; }
     .google-btn svg { width: 16px; height: 16px; }
 
@@ -34,10 +23,7 @@
     .signout-btn { background: none; border: 1px solid #3e3e42; color: #969696; cursor: pointer; font-size: 10px; padding: 3px 8px; }
     .signout-btn:hover { background: #2d2d30; color: #d4d4d4; }
 
-    .toggle-row { 
-      display: flex; align-items: center; justify-content: space-between; 
-      padding: 10px 16px; border-bottom: 1px solid #3e3e42; background: #252526;
-    }
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid #3e3e42; background: #252526; }
     .toggle-row label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #969696; }
     .toggle { position: relative; width: 36px; height: 20px; }
     .toggle input { opacity: 0; width: 0; height: 0; }
@@ -52,16 +38,17 @@
     .stat-num { font-size: 20px; font-weight: 700; color: #d4d4d4; }
     .stat-label { font-size: 9px; color: #6a6a6a; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
 
-    .section { padding: 14px 16px; border-bottom: 1px solid #3e3e42; }
-    .section label { display: block; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #969696; margin-bottom: 6px; }
-    input[type="password"] {
-      width: 100%; padding: 8px 10px; background: #2d2d30; border: 1px solid #3e3e42;
-      color: #d4d4d4; font-size: 12px; outline: none; font-family: "Consolas", "Courier New", monospace;
+    .section { padding: 12px 16px; border-bottom: 1px solid #3e3e42; }
+    .section label { display: block; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #969696; margin-bottom: 5px; }
+    input[type="password"], input[type="text"] {
+      width: 100%; padding: 7px 10px; background: #2d2d30; border: 1px solid #3e3e42;
+      color: #d4d4d4; font-size: 12px; outline: none; font-family: inherit;
     }
+    input[type="password"] { font-family: "Consolas", "Courier New", monospace; }
     input:focus { border-color: #4ec9b0; }
-    .help { font-size: 10px; color: #6a6a6a; margin-top: 4px; }
+    .help { font-size: 10px; color: #6a6a6a; margin-top: 3px; }
 
-    .btn-row { padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
+    .btn-row { padding: 12px 16px; display: flex; flex-direction: column; gap: 6px; }
     .btn { display: block; width: 100%; padding: 9px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; cursor: pointer; text-align: center; border: none; }
     .btn-primary { background: #4ec9b0; color: #1e1e1e; }
     .btn-primary:hover { background: #3db89f; }
@@ -69,6 +56,13 @@
     .btn-secondary:hover { background: #333336; }
     .btn-ghost { background: none; color: #6a6a6a; font-size: 10px; border: none; padding: 4px; text-decoration: underline; }
     .btn-ghost:hover { color: #969696; }
+
+    .status-bar { padding: 10px 16px; border-bottom: 1px solid #3e3e42; display: flex; gap: 6px; align-items: center; }
+    .status-bar input { flex: 1; padding: 6px 8px; background: #2d2d30; border: 1px solid #3e3e42; color: #d4d4d4; font-size: 11px; outline: none; }
+    .status-bar input:focus { border-color: #4ec9b0; }
+    .status-bar input::placeholder { color: #4a4a4f; }
+    .status-btn { background: #3e3e42; border: none; color: #969696; font-size: 10px; padding: 6px 8px; cursor: pointer; font-weight: 600; }
+    .status-btn:hover { background: #4a4a4f; }
 
     .hidden { display: none !important; }
   </style>
@@ -97,6 +91,12 @@
     </div>
   </div>
 
+  <!-- Current Status -->
+  <div class="status-bar hidden" id="statusBar">
+    <input type="text" id="currentStatus" placeholder="What are you working on? e.g. studying for calc test">
+    <button class="status-btn" id="statusSaveBtn">Set</button>
+  </div>
+
   <div class="toggle-row">
     <label>Active</label>
     <div class="toggle"><input type="checkbox" id="enabled" checked><span class="slider"></span></div>
@@ -117,8 +117,7 @@
   <div class="btn-row">
     <button class="btn btn-primary" id="saveBtn">Save</button>
     <button class="btn btn-secondary" id="dashboardBtn">Dashboard</button>
-  
-    <button class="btn btn-ghost" id="resetBtn">Reset stats</button>
+    <button class="btn btn-ghost" id="resetBtn">Reset all stats</button>
   </div>
 
   <script src="popup.js"></script>

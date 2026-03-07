@@ -30,6 +30,8 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
   btn.disabled = true;
   btn.textContent = "Saving...";
 
+  const status = document.getElementById("currentStatusOnboard").value.trim();
+
   const profile = {
     displayName: document.getElementById("displayName").value.trim(),
     classes: classesRaw.split(",").map((c) => c.trim()).filter(Boolean),
@@ -45,6 +47,11 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
     btn.disabled = false;
     btn.textContent = "Start Thinking";
     return;
+  }
+
+  // Save status separately if provided
+  if (status) {
+    await msg("SAVE_STATUS", { status });
   }
 
   document.getElementById("formCard").innerHTML = `
