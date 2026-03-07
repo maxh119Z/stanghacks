@@ -1,50 +1,96 @@
-// Load saved settings
-chrome.storage.sync.get(
-  ["apiKey", "classes", "difficulty", "sensitivity", "enabled"],
-  (data) => {
-    if (data.apiKey) document.getElementById("apiKey").value = data.apiKey;
-    if (data.classes) document.getElementById("classes").value = data.classes;
-    if (data.difficulty) document.getElementById("difficulty").value = data.difficulty;
-    if (data.sensitivity) document.getElementById("sensitivity").value = data.sensitivity;
-    document.getElementById("enabled").checked = data.enabled !== false;
+function msg(type, data = {}) {
+  return new Promise((r) => chrome.runtime.sendMessage({ type, ...data }, r));
+}
+
+// ── Load auth state ──
+async function loadAuth() {
+  const auth = await msg("GET_AUTH");
+
+  if (auth && auth.loggedIn) {
+    document.getElementById("loggedOutView").classList.add("hidden");
+    document.getElementById("loggedInView").classList.remove("hidden");
+    document.getElementById("userName").textContent = auth.displayName || "User";
+    document.getElementById("userEmail").textContent = auth.email || "";
+    if (auth.photoUrl) {
+      document.getElementById("userAvatar").src = auth.photoUrl;
+    }
+  } else {
+    document.getElementById("loggedOutView").classList.remove("hidden");
+    document.getElementById("loggedInView").classList.add("hidden");
   }
-);
+}
+loadAuth();
 
-// Load stats
-chrome.storage.local.get("sessionStats", (data) => {
-  const stats = data.sessionStats || { total: 0, blocked: 0, allowed: 0 };
-  document.getElementById("stat-total").textContent = stats.total;
-  document.getElementById("stat-nudged").textContent = stats.blocked;
-  document.getElementById("stat-clean").textContent = stats.allowed;
+// ── Google Sign In ──
+document.getElementById("googleSignInBtn").addEventListener("click", async () => {
+  const btn = document.getElementById("googleSignInBtn");
+  btn.textContent = "Signing in...";
+  btn.disabled = true;
+
+  const res = await msg("GOOGLE_SIGN_IN");
+
+  if (res && res.error) {
+    btn.textContent = "Sign in with Google";
+    btn.disabled = false;
+    alert("Sign in failed: " + res.error);
+    return;
+  }
+
+  if (res && res.needsOnboarding) {
+    // New user - open onboarding page
+    await msg("OPEN_PAGE", { page: "onboarding.html" });
+    window.close();
+  } else {
+    // Existing user - just reload popup
+    loadAuth();
+    btn.textContent = "Sign in with Google";
+    btn.disabled = false;
+  }
 });
 
-// Save
+// ── Sign Out ──
+document.getElementById("signOutBtn").addEventListener("click", async () => {
+  await msg("SIGN_OUT");
+  loadAuth();
+});
+
+// ── Load settings ──
+chrome.storage.sync.get(["apiKey", "enabled"], (data) => {
+  if (data.apiKey) document.getElementById("apiKey").value = data.apiKey;
+  document.getElementById("enabled").checked = data.enabled !== false;
+});
+
+// ── Load stats ──
+msg("GET_STATS", { days: 1 }).then((res) => {
+  if (res?.stats?.[0]) {
+    document.getElementById("statTotal").textContent = res.stats[0].total || 0;
+    document.getElementById("statNudged").textContent = res.stats[0].nudged || 0;
+    document.getElementById("statClean").textContent = res.stats[0].allowed || 0;
+  }
+});
+
+// ── Save ──
 document.getElementById("saveBtn").addEventListener("click", () => {
-  const settings = {
+  chrome.storage.sync.set({
     apiKey: document.getElementById("apiKey").value.trim(),
-    classes: document.getElementById("classes").value.trim(),
-    difficulty: document.getElementById("difficulty").value,
-    sensitivity: document.getElementById("sensitivity").value,
     enabled: document.getElementById("enabled").checked,
-  };
-
-  chrome.storage.sync.set(settings, () => {
+  }, () => {
     const btn = document.getElementById("saveBtn");
-    btn.textContent = "Saved ✓";
-    btn.classList.add("saved");
-    setTimeout(() => {
-      btn.textContent = "Save Settings";
-      btn.classList.remove("saved");
-    }, 1500);
+    btn.textContent = "Saved \u2713";
+    btn.style.background = "linear-gradient(135deg, #10b981, #059669)";
+    setTimeout(() => { btn.textContent = "Save"; btn.style.background = ""; }, 1200);
   });
 });
 
-// Reset stats
-document.getElementById("resetStats").addEventListener("click", () => {
-  chrome.storage.local.set({
-    sessionStats: { total: 0, blocked: 0, allowed: 0, categories: {} },
-  });
-  document.getElementById("stat-total").textContent = "0";
-  document.getElementById("stat-nudged").textContent = "0";
-  document.getElementById("stat-clean").textContent = "0";
+// ── Dashboard ──
+document.getElementById("dashboardBtn").addEventListener("click", () => {
+  msg("OPEN_PAGE", { page: "dashboard.html" });
+});
+
+// ── Reset ──
+document.getElementById("resetBtn").addEventListener("click", () => {
+  chrome.storage.local.set({ sessionStats: { total: 0, nudged: 0, allowed: 0, categories: {}, subjects: {} } });
+  document.getElementById("statTotal").textContent = "0";
+  document.getElementById("statNudged").textContent = "0";
+  document.getElementById("statClean").textContent = "0";
 });

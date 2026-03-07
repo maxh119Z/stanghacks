@@ -1,126 +1,379 @@
 // BrainGuard Background Service Worker
-// Handles prompt classification via OpenAI API
+import { googleSignIn, getValidToken, saveAuthToStorage, signOut } from "./auth.js";
+import {
+  getUserProfile, saveUserProfile, logPrompt,
+  getDailyStats, saveDailyStats, updateDynamicProfile,
+} from "./db.js";
+
+// ── Message Router ────────────────────────────────────────────
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === "CLASSIFY_PROMPT") {
-    handleClassification(message.prompt).then(sendResponse);
-    return true; // Keep channel open for async response
+  const handlers = {
+    CLASSIFY_PROMPT: () => handleClassification(message.prompt, message.images, message.site),
+    GOOGLE_SIGN_IN: () => handleGoogleSignIn(),
+    SIGN_OUT: () => handleSignOut(),
+    GET_AUTH: () => getAuthState(),
+    GET_PROFILE: () => handleGetProfile(),
+    SAVE_PROFILE: () => handleSaveProfile(message.profile),
+    SAVE_ONBOARDING: () => handleSaveOnboarding(message.profile),
+    GET_STATS: () => handleGetStats(message.days),
+    OPEN_PAGE: () => { chrome.tabs.create({ url: chrome.runtime.getURL(message.page) }); return Promise.resolve({ ok: true }); },
+    LOG_ACTION: () => handleLogAction(message.action),
+  };
+
+  const handler = handlers[message.type];
+  if (handler) {
+    handler().then(sendResponse).catch((e) => sendResponse({ error: e.message }));
+    return true;
   }
 });
 
-async function handleClassification(promptText) {
-  // Get settings
-  const data = await chrome.storage.sync.get([
-    "apiKey",
-    "classes",
-    "difficulty",
-    "enabled",
-  ]);
+// ── Auth ──────────────────────────────────────────────────────
 
-  if (data.enabled === false) {
-    return { error: "BrainGuard is disabled" };
+async function handleGoogleSignIn() {
+  const authData = await googleSignIn();
+  await saveAuthToStorage(authData);
+
+  // Check if user has a profile (returning user vs new user)
+  const profile = await getUserProfile(authData.localId, authData.idToken);
+
+  if (!profile || !profile.classes || profile.classes.length === 0) {
+    // New user — needs onboarding
+    return { ok: true, uid: authData.localId, needsOnboarding: true };
   }
 
-  if (!data.apiKey) {
-    return { error: "No API key set. Click the BrainGuard extension icon to add one." };
+  return { ok: true, uid: authData.localId, needsOnboarding: false };
+}
+
+async function handleSignOut() {
+  await signOut();
+  return { ok: true };
+}
+
+async function getAuthState() {
+  const stored = await chrome.storage.local.get(["uid", "email", "displayName", "photoUrl"]);
+  return {
+    loggedIn: !!stored.uid,
+    uid: stored.uid || null,
+    email: stored.email || null,
+    displayName: stored.displayName || null,
+    photoUrl: stored.photoUrl || null,
+  };
+}
+
+// ── Onboarding (first-time profile setup after Google sign-in) ──
+
+async function handleSaveOnboarding(profile) {
+  const auth = await getValidToken();
+  if (!auth) return { error: "Not logged in" };
+
+  const stored = await chrome.storage.local.get(["email", "displayName", "photoUrl"]);
+
+  const fullProfile = {
+    email: stored.email || "",
+    displayName: profile.displayName || stored.displayName || "",
+    photoUrl: stored.photoUrl || "",
+    classes: profile.classes || [],
+    difficulty: profile.difficulty || "high_school",
+    sensitivity: profile.sensitivity || 2,
+    dynamicKnowledge: {},
+    createdAt: new Date().toISOString(),
+    lastActive: new Date().toISOString(),
+  };
+
+  await saveUserProfile(auth.uid, auth.idToken, fullProfile);
+
+  // Also save sensitivity locally for the extension
+  await chrome.storage.sync.set({ sensitivity: fullProfile.sensitivity });
+
+  return { ok: true };
+}
+
+// ── Profile ───────────────────────────────────────────────────
+
+async function handleGetProfile() {
+  const auth = await getValidToken();
+  if (!auth) return { error: "Not logged in" };
+  const profile = await getUserProfile(auth.uid, auth.idToken);
+  return { profile: profile || {} };
+}
+
+async function handleSaveProfile(profile) {
+  const auth = await getValidToken();
+  if (!auth) return { error: "Not logged in" };
+  await saveUserProfile(auth.uid, auth.idToken, {
+    ...profile,
+    lastActive: new Date().toISOString(),
+  });
+  if (profile.sensitivity) {
+    await chrome.storage.sync.set({ sensitivity: profile.sensitivity });
+  }
+  return { ok: true };
+}
+
+// ── Stats ─────────────────────────────────────────────────────
+
+async function handleGetStats(days = 7) {
+  const auth = await getValidToken();
+  if (!auth) {
+    const local = await chrome.storage.local.get("sessionStats");
+    return { stats: [{ date: todayStr(), ...(local.sessionStats || emptyStats()) }] };
   }
 
-  const classes = data.classes || "General knowledge";
-  const difficulty = data.difficulty || "high_school";
+  const results = [];
+  for (let i = 0; i < days; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const ds = d.toISOString().split("T")[0];
+    const s = await getDailyStats(auth.uid, auth.idToken, ds);
+    results.push({ date: ds, ...(s || emptyStats()) });
+  }
+  return { stats: results };
+}
 
-  const systemPrompt = buildSystemPrompt(classes, difficulty);
+async function handleLogAction(action) {
+  // Update stats with tried_first / sent_anyway
+  const auth = await getValidToken();
+  if (auth) {
+    const ds = todayStr();
+    const stats = (await getDailyStats(auth.uid, auth.idToken, ds)) || emptyStats();
+    if (action === "tried_first") stats.triedFirst = (stats.triedFirst || 0) + 1;
+    if (action === "sent_anyway") stats.sentAnyway = (stats.sentAnyway || 0) + 1;
+    await saveDailyStats(auth.uid, auth.idToken, ds, stats);
+  }
+  return { ok: true };
+}
+
+function emptyStats() {
+  return { total: 0, nudged: 0, allowed: 0, sentAnyway: 0, triedFirst: 0, categories: {}, subjects: {} };
+}
+
+function todayStr() {
+  return new Date().toISOString().split("T")[0];
+}
+
+// ── Classification ────────────────────────────────────────────
+
+async function handleClassification(promptText, images = [], site = "") {
+  const settings = await chrome.storage.sync.get(["apiKey", "enabled"]);
+  if (settings.enabled === false) return { error: "disabled" };
+  if (!settings.apiKey) return { error: "No API key set. Click the BrainGuard icon to add your OpenAI key." };
+
+  // Get profile for context
+  let profile = null;
+  const auth = await getValidToken();
+  if (auth) {
+    try { profile = await getUserProfile(auth.uid, auth.idToken); } catch (e) {}
+  }
+
+  if (!profile) {
+    const local = await chrome.storage.sync.get(["classes", "difficulty", "sensitivity"]);
+    profile = {
+      classes: local.classes ? (typeof local.classes === "string" ? local.classes.split(",").map(s => s.trim()) : local.classes) : [],
+      difficulty: local.difficulty || "high_school",
+      sensitivity: local.sensitivity || 2,
+      dynamicKnowledge: {},
+    };
+  }
+
+  const result = await callOpenAI(settings.apiKey, promptText, images, profile);
+  if (result.error) return result;
+
+  // Apply sensitivity
+  const sens = profile.sensitivity || 2;
+  if (sens <= 1 && result.outsourcing_risk === "low") {
+    result.recommended_intervention = "allow";
+  }
+  if (sens >= 3 && result.outsourcing_risk !== "low" && result.recommended_intervention === "allow") {
+    result.recommended_intervention = "hint";
+  }
+
+  // Async Firebase sync (don't block response)
+  syncToFirebase(result, promptText, site, auth, profile);
+
+  return result;
+}
+
+async function syncToFirebase(classification, promptText, site, auth, profile) {
+  try {
+    if (!auth) {
+      // Local-only stats
+      const local = await chrome.storage.local.get("sessionStats");
+      const s = local.sessionStats || emptyStats();
+      s.total++;
+      const cat = classification.intent_category;
+      s.categories[cat] = (s.categories[cat] || 0) + 1;
+      if (classification.subject) {
+        s.subjects = s.subjects || {};
+        s.subjects[classification.subject] = (s.subjects[classification.subject] || 0) + 1;
+      }
+      if (classification.recommended_intervention === "allow") s.allowed++;
+      else s.nudged++;
+      await chrome.storage.local.set({ sessionStats: s });
+      return;
+    }
+
+    // Log prompt
+    await logPrompt(auth.uid, auth.idToken, {
+      text: promptText.slice(0, 500),
+      intentCategory: classification.intent_category,
+      outsourcingRisk: classification.outsourcing_risk,
+      confidence: classification.confidence,
+      subject: classification.subject,
+      intervention: classification.recommended_intervention,
+      site: site || "unknown",
+    });
+
+    // Update daily stats
+    const ds = todayStr();
+    const stats = (await getDailyStats(auth.uid, auth.idToken, ds)) || emptyStats();
+    stats.total = (stats.total || 0) + 1;
+    const cat = classification.intent_category;
+    if (!stats.categories) stats.categories = {};
+    stats.categories[cat] = (stats.categories[cat] || 0) + 1;
+    if (!stats.subjects) stats.subjects = {};
+    if (classification.subject) {
+      stats.subjects[classification.subject] = (stats.subjects[classification.subject] || 0) + 1;
+    }
+    if (classification.recommended_intervention === "allow") stats.allowed = (stats.allowed || 0) + 1;
+    else stats.nudged = (stats.nudged || 0) + 1;
+    await saveDailyStats(auth.uid, auth.idToken, ds, stats);
+
+    // Dynamic profile update
+    if (classification.subject && classification.outsourcing_risk !== "low" && classification.profile_update) {
+      await updateDynamicProfile(auth.uid, auth.idToken, {
+        subject: classification.subject,
+        topic: classification.profile_update.topic || null,
+      });
+    }
+  } catch (e) {
+    console.error("[BrainGuard] Sync error:", e);
+  }
+}
+
+// ── OpenAI API ────────────────────────────────────────────────
+
+async function callOpenAI(apiKey, promptText, images, profile) {
+  const systemPrompt = buildSystemPrompt(profile);
+  const userContent = [];
+
+  if (images && images.length > 0) {
+    for (const imgUrl of images) {
+      userContent.push({ type: "image_url", image_url: { url: imgUrl, detail: "low" } });
+    }
+    userContent.push({ type: "text", text: `[Prompt with ${images.length} image(s)]:\n${promptText}` });
+  } else {
+    userContent.push({ type: "text", text: promptText });
+  }
 
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${data.apiKey}`,
-      },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: promptText },
+          { role: "user", content: userContent },
         ],
-        temperature: 0.3,
-        max_tokens: 300,
+        temperature: 0.2,
+        max_tokens: 400,
       }),
     });
 
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      return {
-        error: `API error: ${response.status} - ${err.error?.message || "Unknown error"}`,
-      };
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return { error: `API error ${res.status}: ${err.error?.message || "Unknown"}` };
     }
 
-    const result = await response.json();
-    const content = result.choices?.[0]?.message?.content || "";
-
-    return parseClassification(content);
-  } catch (err) {
-    return { error: `Network error: ${err.message}` };
+    const data = await res.json();
+    return parseClassification(data.choices?.[0]?.message?.content || "");
+  } catch (e) {
+    return { error: `Network error: ${e.message}` };
   }
 }
 
-function buildSystemPrompt(classes, difficulty) {
-  return `You are BrainGuard, a cognitive dependency classifier. Your job is to evaluate whether a student's AI prompt is something they should try solving themselves first.
+function buildSystemPrompt(profile) {
+  const classes = Array.isArray(profile.classes) ? profile.classes.join(", ") : profile.classes || "General";
+  const difficulty = profile.difficulty || "high_school";
+
+  let dynamicCtx = "";
+  if (profile.dynamicKnowledge && Object.keys(profile.dynamicKnowledge).length > 0) {
+    dynamicCtx = "\nDYNAMIC KNOWLEDGE (learned from usage):\n" +
+      Object.entries(profile.dynamicKnowledge)
+        .map(([subj, d]) => `  - ${subj}: ${d.promptCount} prompts${d.topics?.length ? ` (topics: ${d.topics.slice(-5).join(", ")})` : ""}`)
+        .join("\n") + "\n";
+  }
+
+  return `You are BrainGuard, a cognitive dependency classifier. Evaluate whether a student's AI prompt is something they should try solving themselves.
 
 STUDENT PROFILE:
 - Level: ${difficulty}
-- Current classes: ${classes}
+- Classes: ${classes}
+${dynamicCtx}
+EVALUATE THESE DIMENSIONS:
 
-CLASSIFICATION CATEGORIES:
-1. direct_answer - Student is asking for a direct answer they could figure out (e.g., "What is 2+2?", "What year was the Declaration of Independence signed?")
-2. homework_completion - Student wants AI to do their homework/assignment (e.g., "Write me an essay about...", "Solve problems 1-10")  
-3. concept_clarification - Student wants to understand a concept better (e.g., "Explain how photosynthesis works", "What's the difference between mitosis and meiosis?")
-4. brainstorming - Student is looking for ideas or creative direction (e.g., "What are some topics I could write about?")
-5. editing_polishing - Student wants help improving their own work (e.g., "Can you proofread this?", "How can I make this essay stronger?")
-6. advanced_help - Genuinely complex problem that benefits from AI (e.g., debugging code, complex research synthesis)
-7. casual_chat - Not academic, just chatting
+1. intent_category (string): One of:
+   - "direct_answer" — asking for a fact/answer they could figure out
+   - "homework_completion" — wants AI to do their assignment
+   - "concept_clarification" — wants to understand something better (GOOD use)
+   - "brainstorming" — looking for ideas (GOOD use)
+   - "editing_polishing" — improving their own work (OK use)
+   - "advanced_help" — genuinely complex problem (GOOD use)
+   - "casual_chat" — not academic
 
-DEPENDENCY LEVEL (1-5):
-1 = Totally fine, good use of AI (concept clarification, brainstorming, advanced problems)
-2 = Acceptable, but could try first (editing, complex questions)  
-3 = Borderline - student should attempt first (moderate homework help)
-4 = Likely too dependent - this is solvable with effort (direct answers, simple homework)
-5 = Definitely do this yourself (trivial questions, basic homework completion)
+2. outsourcing_risk (string): "low" | "medium" | "high"
 
-Consider the student's classes when judging. A calculus student asking about basic algebra = level 5. A student in intro biology asking about advanced genetics = level 1.
+3. confidence (number 0-1): How confident are you?
 
-RESPOND IN EXACTLY THIS JSON FORMAT, nothing else:
+4. subject (string): Academic subject (e.g. "calculus", "english", "biology", "computer_science", "general")
+
+5. recommended_intervention (string): "allow" | "hint" | "nudge" | "cooldown"
+
+6. message (string): Brief, friendly, non-preachy message (1-2 sentences). Supportive coach, not nagging parent.
+
+7. hint (string|null): If intervention is hint/nudge/cooldown, give a concrete starting point. Otherwise null.
+
+8. profile_update (object|null): If this reveals a specific topic worth tracking:
+   { "topic": "integration by parts" }
+   Otherwise null.
+
+Consider the student's classes when judging. A calculus student asking basic algebra = high risk. A biology student asking advanced genetics = low risk.
+
+Images: evaluate the intellectual content being requested, same as text.
+
+RESPOND ONLY with this JSON:
 {
-  "category": "one_of_the_categories",
-  "level": 3,
-  "message": "A brief, friendly, non-preachy message (1-2 sentences max). Be encouraging, not condescending. Think supportive coach, not nagging parent.",
-  "hint": "If level >= 3, give a brief hint or starting point to help them solve it themselves. Otherwise null."
+  "intent_category": "...",
+  "outsourcing_risk": "...",
+  "confidence": 0.85,
+  "subject": "...",
+  "recommended_intervention": "...",
+  "message": "...",
+  "hint": "..." or null,
+  "profile_update": { "topic": "..." } or null
 }`;
 }
 
 function parseClassification(content) {
   try {
-    // Strip markdown code fences if present
-    const cleaned = content
-      .replace(/```json\s*/g, "")
-      .replace(/```\s*/g, "")
-      .trim();
-    const parsed = JSON.parse(cleaned);
-
+    const cleaned = content.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
+    const p = JSON.parse(cleaned);
     return {
-      category: parsed.category || "casual_chat",
-      level: Math.min(5, Math.max(1, parseInt(parsed.level) || 1)),
-      message: parsed.message || "Thinking about this one...",
-      hint: parsed.hint || null,
+      intent_category: p.intent_category || "casual_chat",
+      outsourcing_risk: p.outsourcing_risk || "low",
+      confidence: Math.min(1, Math.max(0, parseFloat(p.confidence) || 0.5)),
+      subject: p.subject || "general",
+      recommended_intervention: p.recommended_intervention || "allow",
+      message: p.message || "Thinking about this one...",
+      hint: p.hint || null,
+      profile_update: p.profile_update || null,
     };
   } catch (e) {
-    console.error("[BrainGuard] Failed to parse classification:", content);
-    // Fail open
     return {
-      category: "unknown",
-      level: 1,
-      message: "Couldn't classify this one — sending through!",
-      hint: null,
+      intent_category: "unknown", outsourcing_risk: "low", confidence: 0,
+      subject: "general", recommended_intervention: "allow",
+      message: "Couldn't classify — sending through.", hint: null, profile_update: null,
     };
   }
 }

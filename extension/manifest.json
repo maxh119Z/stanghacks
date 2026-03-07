@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "BrainGuard - AI Dependency Monitor",
-  "version": "0.1.0",
-  "description": "Monitors your AI prompts and nudges you to think first. Like screentime, but for your brain.",
-  "permissions": ["storage"],
+  "name": "BrainGuard — AI Dependency Monitor",
+  "version": "0.3.0",
+  "description": "Like screentime, but for your brain. Nudges you to think before prompting AI.",
+  "permissions": ["storage", "identity"],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
@@ -13,6 +13,10 @@
   "icons": {
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
   },
   "content_scripts": [
     {
@@ -26,8 +30,5 @@
       "css": ["overlay.css"],
       "run_at": "document_idle"
     }
-  ],
-  "background": {
-    "service_worker": "background.js"
-  }
+  ]
 }

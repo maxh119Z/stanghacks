@@ -4,274 +4,121 @@
   <meta charset="UTF-8">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { width: 340px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0f0f1a; color: #e2e8f0; }
 
-    body {
-      width: 360px;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #0f0f1a;
-      color: #e2e8f0;
+    .header { padding: 18px 20px; background: linear-gradient(135deg, #1e1b4b, #312e81); border-bottom: 1px solid rgba(99,102,241,0.15); }
+    .header h1 { font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .header p { font-size: 11px; color: #a5b4fc; margin-top: 3px; }
+
+    /* Auth section */
+    .auth-section { padding: 14px 20px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .user-row { display: flex; align-items: center; gap: 10px; }
+    .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: #312e81; }
+    .user-info { flex: 1; }
+    .user-name { font-size: 13px; font-weight: 600; }
+    .user-email { font-size: 11px; color: #94a3b8; }
+    .signout-btn { background: none; border: none; color: #6366f1; cursor: pointer; font-size: 11px; }
+
+    .google-btn {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      width: 100%; padding: 10px; border-radius: 8px;
+      background: white; color: #333; font-size: 13px; font-weight: 600;
+      border: none; cursor: pointer; transition: all 0.2s;
     }
+    .google-btn:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+    .google-btn svg { width: 18px; height: 18px; }
 
-    .header {
-      padding: 20px;
-      background: linear-gradient(135deg, #1e1b4b, #312e81);
-      border-bottom: 1px solid rgba(99, 102, 241, 0.2);
-    }
-
-    .header h1 {
-      font-size: 18px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .header p {
-      font-size: 12px;
-      color: #a5b4fc;
-      margin-top: 4px;
-    }
-
-    .toggle-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 20px;
-      background: rgba(255, 255, 255, 0.03);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .toggle-row label { font-size: 14px; font-weight: 600; }
-
-    .toggle {
-      position: relative;
-      width: 44px;
-      height: 24px;
-    }
-
+    /* Toggle */
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .toggle-row label { font-size: 13px; font-weight: 600; }
+    .toggle { position: relative; width: 40px; height: 22px; }
     .toggle input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; inset: 0; background: #334155; border-radius: 22px; cursor: pointer; transition: 0.3s; }
+    .slider::before { content: ""; position: absolute; height: 16px; width: 16px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; }
+    .toggle input:checked + .slider { background: #6366f1; }
+    .toggle input:checked + .slider::before { transform: translateX(18px); }
 
-    .slider {
-      position: absolute;
-      inset: 0;
-      background: #334155;
-      border-radius: 24px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
+    /* Stats */
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; padding: 14px 20px; background: rgba(99,102,241,0.03); }
+    .stat { text-align: center; }
+    .stat-num { font-size: 22px; font-weight: 700; color: #a5b4fc; }
+    .stat-label { font-size: 9px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
 
-    .slider::before {
-      content: "";
-      position: absolute;
-      height: 18px;
-      width: 18px;
-      left: 3px;
-      bottom: 3px;
-      background: white;
-      border-radius: 50%;
-      transition: 0.3s;
+    /* Form */
+    .section { padding: 14px 20px; }
+    .section label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8; margin-bottom: 5px; }
+    input[type="password"] {
+      width: 100%; padding: 9px 11px; background: #1e1e2f; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 7px; color: #e2e8f0; font-size: 12px; outline: none;
     }
+    input:focus { border-color: #6366f1; }
+    .help { font-size: 10px; color: #475569; margin-top: 5px; }
 
-    .toggle input:checked + .slider {
-      background: #6366f1;
-    }
+    .divider { height: 1px; background: rgba(255,255,255,0.04); }
 
-    .toggle input:checked + .slider::before {
-      transform: translateX(20px);
-    }
+    .btn-row { padding: 14px 20px; display: flex; flex-direction: column; gap: 8px; }
+    .btn { display: block; width: 100%; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; border: none; transition: all 0.2s; }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; }
+    .btn-secondary { background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.08); }
+    .btn-ghost { background: none; color: #64748b; font-size: 11px; border: none; padding: 6px; }
 
-    .section {
-      padding: 16px 20px;
-    }
-
-    .section label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #94a3b8;
-      margin-bottom: 8px;
-    }
-
-    input[type="password"],
-    input[type="text"],
-    textarea,
-    select {
-      width: 100%;
-      padding: 10px 12px;
-      background: #1e1e2f;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      color: #e2e8f0;
-      font-size: 13px;
-      font-family: inherit;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    input:focus, textarea:focus, select:focus {
-      border-color: #6366f1;
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 60px;
-    }
-
-    select {
-      cursor: pointer;
-    }
-
-    .help-text {
-      font-size: 11px;
-      color: #64748b;
-      margin-top: 6px;
-    }
-
-    .divider {
-      height: 1px;
-      background: rgba(255, 255, 255, 0.05);
-    }
-
-    .stats-bar {
-      display: flex;
-      gap: 1px;
-      padding: 16px 20px;
-      background: rgba(99, 102, 241, 0.05);
-    }
-
-    .stat {
-      flex: 1;
-      text-align: center;
-    }
-
-    .stat-num {
-      font-size: 20px;
-      font-weight: 700;
-      color: #a5b4fc;
-    }
-
-    .stat-label {
-      font-size: 10px;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .save-btn {
-      display: block;
-      width: calc(100% - 40px);
-      margin: 0 20px 16px;
-      padding: 10px;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .save-btn:hover {
-      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
-      transform: translateY(-1px);
-    }
-
-    .save-btn.saved {
-      background: linear-gradient(135deg, #10b981, #059669);
-    }
-
-    .reset-btn {
-      display: block;
-      width: calc(100% - 40px);
-      margin: 0 20px 20px;
-      padding: 8px;
-      background: transparent;
-      color: #64748b;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 8px;
-      font-size: 12px;
-      cursor: pointer;
-    }
-
-    .reset-btn:hover {
-      color: #ef4444;
-      border-color: rgba(239, 68, 68, 0.3);
-    }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
   <div class="header">
     <h1>🧠 BrainGuard</h1>
-    <p>AI dependency monitor — think first, prompt second</p>
+    <p>Think first, prompt second</p>
   </div>
 
+  <!-- Logged out state -->
+  <div class="auth-section" id="loggedOutView">
+    <button class="google-btn" id="googleSignInBtn">
+      <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Sign in with Google
+    </button>
+  </div>
+
+  <!-- Logged in state -->
+  <div class="auth-section hidden" id="loggedInView">
+    <div class="user-row">
+      <img class="user-avatar" id="userAvatar" src="" alt="">
+      <div class="user-info">
+        <div class="user-name" id="userName">-</div>
+        <div class="user-email" id="userEmail">-</div>
+      </div>
+      <button class="signout-btn" id="signOutBtn">Sign out</button>
+    </div>
+  </div>
+
+  <!-- Toggle -->
   <div class="toggle-row">
-    <label>Enabled</label>
-    <div class="toggle">
-      <input type="checkbox" id="enabled" checked>
-      <span class="slider"></span>
-    </div>
+    <label>Active</label>
+    <div class="toggle"><input type="checkbox" id="enabled" checked><span class="slider"></span></div>
   </div>
 
-  <div class="stats-bar">
-    <div class="stat">
-      <div class="stat-num" id="stat-total">0</div>
-      <div class="stat-label">Prompts</div>
-    </div>
-    <div class="stat">
-      <div class="stat-num" id="stat-nudged">0</div>
-      <div class="stat-label">Nudged</div>
-    </div>
-    <div class="stat">
-      <div class="stat-num" id="stat-clean">0</div>
-      <div class="stat-label">Clean</div>
-    </div>
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Prompts</div></div>
+    <div class="stat"><div class="stat-num" id="statNudged">0</div><div class="stat-label">Nudged</div></div>
+    <div class="stat"><div class="stat-num" id="statClean">0</div><div class="stat-label">Clean</div></div>
   </div>
 
   <div class="divider"></div>
 
+  <!-- API Key (always local) -->
   <div class="section">
-    <label>OpenAI API Key</label>
+    <label>OpenAI API Key (stored locally only)</label>
     <input type="password" id="apiKey" placeholder="sk-...">
-    <p class="help-text">Uses gpt-4o-mini (~$0.0001 per classification). Your key stays local in Chrome storage.</p>
+    <p class="help">Uses gpt-4o-mini. Never sent to Firebase.</p>
   </div>
 
-  <div class="divider"></div>
-
-  <div class="section">
-    <label>Your Classes</label>
-    <textarea id="classes" placeholder="e.g. AP Calculus BC, AP English Lit, AP CS A, US History, Physics"></textarea>
-    <p class="help-text">Comma-separated. This helps BrainGuard understand what you should know.</p>
+  <div class="btn-row">
+    <button class="btn btn-primary" id="saveBtn">Save</button>
+    <button class="btn btn-secondary" id="dashboardBtn">Open Dashboard</button>
+    <button class="btn btn-ghost" id="resetBtn">Reset stats</button>
   </div>
-
-  <div class="divider"></div>
-
-  <div class="section">
-    <label>Difficulty Level</label>
-    <select id="difficulty">
-      <option value="middle_school">Middle School</option>
-      <option value="high_school" selected>High School</option>
-      <option value="ap_honors">AP / Honors</option>
-      <option value="college">College</option>
-    </select>
-  </div>
-
-  <div class="divider"></div>
-
-  <div class="section" style="padding-bottom: 12px;">
-    <label>Sensitivity (nudge threshold)</label>
-    <select id="sensitivity">
-      <option value="1">Chill — only block obvious stuff</option>
-      <option value="2" selected>Balanced — nudge when borderline</option>
-      <option value="3">Strict — make me try almost everything</option>
-    </select>
-  </div>
-
-  <button class="save-btn" id="saveBtn">Save Settings</button>
-  <button class="reset-btn" id="resetStats">Reset Session Stats</button>
 
   <script src="popup.js"></script>
 </body>

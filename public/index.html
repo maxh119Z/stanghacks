@@ -1,89 +1,173 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to Firebase Hosting</title>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BrainGuard — Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0a0a14; color: #e2e8f0; }
 
-    <!-- update the version number as needed -->
-    <script defer src="/__/firebase/12.10.0/firebase-app-compat.js"></script>
-    <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/12.10.0/firebase-auth-compat.js"></script>
-    <script defer src="/__/firebase/12.10.0/firebase-database-compat.js"></script>
-    <script defer src="/__/firebase/12.10.0/firebase-firestore-compat.js"></script>
-    <script defer src="/__/firebase/12.10.0/firebase-functions-compat.js"></script>
-    <script defer src="/__/firebase/12.10.0/firebase-messaging-compat.js"></script>
-    <script defer src="/__/firebase/12.10.0/firebase-storage-compat.js"></script>
-    <script defer src="/__/firebase/12.10.0/firebase-analytics-compat.js"></script>
-    <script defer src="/__/firebase/12.10.0/firebase-remote-config-compat.js"></script>
-    <script defer src="/__/firebase/12.10.0/firebase-performance-compat.js"></script>
-    <!-- 
-      initialize the SDK after all desired features are loaded, set useEmulator to false
-      to avoid connecting the SDK to running emulators.
-    -->
-    <script defer src="/__/firebase/init.js?useEmulator=true"></script>
+    .nav { display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; background: #0f0f1a; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .nav-brand { font-size: 18px; font-weight: 700; }
+    .nav-right { display: flex; align-items: center; gap: 12px; font-size: 13px; color: #94a3b8; }
+    .nav-right img { width: 28px; height: 28px; border-radius: 50%; }
+    .nav-right button { background: none; border: none; color: #6366f1; cursor: pointer; font-size: 13px; }
 
-    <style media="screen">
-      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
-      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
-      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
-      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
-      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
-      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
-      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
-      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
-      @media (max-width: 600px) {
-        body, #message { margin-top: 0; background: white; box-shadow: none; }
-        body { border-top: 16px solid #ffa100; }
-      }
-    </style>
-  </head>
-  <body>
-    <div id="message">
-      <h2>Welcome</h2>
-      <h1>Firebase Hosting Setup Complete</h1>
-      <p>You're seeing this because you've successfully setup Firebase Hosting. Now it's time to go build something extraordinary!</p>
-      <a target="_blank" href="https://firebase.google.com/docs/hosting/">Open Hosting Documentation</a>
+    .auth-screen { max-width: 400px; margin: 100px auto; text-align: center; }
+    .auth-screen h1 { font-size: 32px; margin-bottom: 8px; }
+    .auth-screen p { color: #94a3b8; margin-bottom: 32px; font-size: 15px; }
+    .google-btn {
+      display: inline-flex; align-items: center; gap: 12px; padding: 14px 32px;
+      background: white; color: #333; font-size: 15px; font-weight: 600;
+      border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s;
+    }
+    .google-btn:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.4); transform: translateY(-1px); }
+    .google-btn svg { width: 20px; height: 20px; }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 28px 24px; }
+    .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
+    .stat-card { background: #13131f; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 18px; text-align: center; }
+    .stat-card .num { font-size: 32px; font-weight: 700; color: #a5b4fc; }
+    .stat-card .label { font-size: 10px; color: #64748b; text-transform: uppercase; margin-top: 4px; }
+    .card { background: #13131f; border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; padding: 24px; margin-bottom: 20px; }
+    .card h2 { font-size: 14px; font-weight: 700; color: #a5b4fc; margin-bottom: 16px; text-transform: uppercase; }
+    .cat-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    .cat-name { font-size: 13px; width: 150px; text-transform: capitalize; }
+    .cat-bar-bg { flex: 1; height: 8px; background: rgba(255,255,255,0.04); border-radius: 4px; overflow: hidden; }
+    .cat-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #6366f1, #8b5cf6); }
+    .cat-count { font-size: 12px; color: #94a3b8; width: 40px; text-align: right; }
+    .knowledge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 10px; }
+    .knowledge-chip { background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.15); border-radius: 10px; padding: 12px; }
+    .knowledge-chip h4 { font-size: 13px; font-weight: 700; color: #c7d2fe; text-transform: capitalize; }
+    .knowledge-chip .kc { font-size: 11px; color: #818cf8; }
+    .knowledge-chip .kt { font-size: 11px; color: #64748b; margin-top: 4px; }
+    .hidden { display: none; }
+    .muted { color: #475569; }
+    @media (max-width: 640px) { .stats-row { grid-template-columns: repeat(2,1fr); } }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-brand">🧠 BrainGuard</div>
+    <div class="nav-right">
+      <img id="navPhoto" src="" alt="" class="hidden">
+      <span id="navName"></span>
+      <button id="signoutBtn" class="hidden">Sign out</button>
     </div>
-    <p id="load">Firebase SDK Loading&hellip;</p>
+  </nav>
 
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const loadEl = document.querySelector('#load');
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-        // // The Firebase SDK is initialized and available here!
-        //
-        // firebase.auth().onAuthStateChanged(user => { });
-        // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
-        // firebase.firestore().doc('/foo/bar').get().then(() => { });
-        // firebase.functions().httpsCallable('yourFunction')().then(() => { });
-        // firebase.messaging().requestPermission().then(() => { });
-        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-        // firebase.analytics(); // call to activate
-        // firebase.analytics().logEvent('tutorial_completed');
-        // firebase.performance(); // call to activate
-        //
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+  <!-- Auth -->
+  <div id="authView" class="auth-screen">
+    <h1>🧠 BrainGuard</h1>
+    <p>Sign in to view your AI usage dashboard</p>
+    <button class="google-btn" id="googleBtn">
+      <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Sign in with Google
+    </button>
+  </div>
 
+  <!-- Dashboard -->
+  <div id="dashView" class="container hidden">
+    <div class="stats-row">
+      <div class="stat-card"><div class="num" id="sTotal">-</div><div class="label">Total</div></div>
+      <div class="stat-card"><div class="num" id="sNudged">-</div><div class="label">Nudged</div></div>
+      <div class="stat-card"><div class="num" id="sClean">-</div><div class="label">Clean</div></div>
+      <div class="stat-card"><div class="num" id="sRate">-</div><div class="label">Nudge Rate</div></div>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+      <div class="card"><h2>Categories (7 days)</h2><div id="wCats" class="muted">Loading...</div></div>
+      <div class="card"><h2>Subjects</h2><div id="wSubjects" class="muted">Loading...</div></div>
+    </div>
+    <div class="card"><h2>Knowledge Map</h2><div class="knowledge-grid" id="wKnowledge"><span class="muted">Loading...</span></div></div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyBYomS5XmPZYEYYFbZPoe1-x6KvncliwS0",
+      authDomain: "stanghacks.firebaseapp.com",
+      projectId: "stanghacks",
+      storageBucket: "stanghacks.firebasestorage.app",
+      messagingSenderId: "1057477643029",
+      appId: "1:1057477643029:web:eecee0d8a2432d924df71c",
+    });
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const provider = new firebase.auth.GoogleAuthProvider();
+
+    document.getElementById("googleBtn").addEventListener("click", () => auth.signInWithPopup(provider));
+    document.getElementById("signoutBtn").addEventListener("click", () => auth.signOut());
+
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        document.getElementById("authView").classList.add("hidden");
+        document.getElementById("dashView").classList.remove("hidden");
+        document.getElementById("navName").textContent = user.displayName || user.email;
+        document.getElementById("signoutBtn").classList.remove("hidden");
+        if (user.photoURL) { const img = document.getElementById("navPhoto"); img.src = user.photoURL; img.classList.remove("hidden"); }
+        await loadDashboard(user.uid);
+      } else {
+        document.getElementById("authView").classList.remove("hidden");
+        document.getElementById("dashView").classList.add("hidden");
+        document.getElementById("signoutBtn").classList.add("hidden");
+        document.getElementById("navPhoto").classList.add("hidden");
+        document.getElementById("navName").textContent = "";
+      }
+    });
+
+    async function loadDashboard(uid) {
+      let total = 0, nudged = 0, clean = 0;
+      const cats = {}, subjs = {};
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        const ds = d.toISOString().split("T")[0];
         try {
-          let app = firebase.app();
-          let features = [
-            'auth', 
-            'database', 
-            'firestore',
-            'functions',
-            'messaging', 
-            'storage', 
-            'analytics', 
-            'remoteConfig',
-            'performance',
-          ].filter(feature => typeof app[feature] === 'function');
-          loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
-        } catch (e) {
-          console.error(e);
-          loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
-        }
-      });
-    </script>
-  </body>
+          const doc = await db.collection("users").doc(uid).collection("dailyStats").doc(ds).get();
+          if (doc.exists) {
+            const x = doc.data();
+            total += x.total || 0; nudged += x.nudged || 0; clean += x.allowed || 0;
+            for (const [k, v] of Object.entries(x.categories || {})) cats[k] = (cats[k] || 0) + v;
+            for (const [k, v] of Object.entries(x.subjects || {})) subjs[k] = (subjs[k] || 0) + v;
+          }
+        } catch (e) { console.warn(e); }
+      }
+
+      document.getElementById("sTotal").textContent = total;
+      document.getElementById("sNudged").textContent = nudged;
+      document.getElementById("sClean").textContent = clean;
+      document.getElementById("sRate").textContent = total > 0 ? Math.round((nudged / total) * 100) + "%" : "0%";
+
+      renderBreakdown("wCats", cats);
+      renderBreakdown("wSubjects", subjs);
+
+      const profileDoc = await db.collection("users").doc(uid).get();
+      if (profileDoc.exists) renderKnowledge(profileDoc.data().dynamicKnowledge || {});
+    }
+
+    function renderBreakdown(id, data) {
+      const el = document.getElementById(id);
+      const entries = Object.entries(data).sort((a, b) => b[1] - a[1]);
+      if (!entries.length) { el.innerHTML = '<span class="muted">No data yet</span>'; return; }
+      const max = Math.max(...entries.map(([, v]) => v), 1);
+      el.innerHTML = entries.map(([n, c]) => `
+        <div class="cat-row"><div class="cat-name">${n.replace(/_/g, " ")}</div>
+        <div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${(c/max)*100}%"></div></div>
+        <div class="cat-count">${c}</div></div>
+      `).join("");
+    }
+
+    function renderKnowledge(dk) {
+      const el = document.getElementById("wKnowledge");
+      const entries = Object.entries(dk);
+      if (!entries.length) { el.innerHTML = '<span class="muted">Builds as you use AI tools.</span>'; return; }
+      el.innerHTML = entries.sort((a, b) => (b[1].promptCount||0) - (a[1].promptCount||0)).map(([s, d]) => `
+        <div class="knowledge-chip"><h4>${s}</h4><div class="kc">${d.promptCount||0} prompts</div>
+        ${d.topics?.length ? `<div class="kt">${d.topics.slice(-6).join(" · ")}</div>` : ""}</div>
+      `).join("");
+    }
+  </script>
+</body>
 </html>
