@@ -334,7 +334,7 @@ STUDENT PROFILE:
 ${dynamicCtx}${statusCtx}
 
 Definitions: ${tryableCtx}
-Obvious commonsense or 1+1 questions should be high risk. Give me answer questions or like "Do this all for me." Shouldn't answer the whole question for them, that is the whole point of critical thinking, unless trivial / reason to do so.
+Obvious commonsense or 1+1 questions should be high risk. "Give me full answer to this problem" questions or like "Write my whole essay." Shouldn't answer the whole question for them, that is the whole point of critical thinking, unless trivial / reason to do so.
 Reviewing for test is okay, low risk because they already know the information.
 
 EVALUATE:
