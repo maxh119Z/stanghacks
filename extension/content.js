@@ -37,7 +37,7 @@
   }
 
   function createOverlay(classification, promptText) {
-    let cooldownSeconds = classification === "high" ? HIGH_COOLDOWN_SECONDS : LOW_COOLDOWN_SECONDS;
+    let cooldownSeconds = classification.outsourcing_risk === "high" ? HIGH_COOLDOWN_SECONDS : LOW_COOLDOWN_SECONDS;
     removeOverlay();
     const needsCooldown = classification.recommended_intervention === "nudge" || classification.recommended_intervention === "cooldown";
     const overlay = document.createElement("div"); overlay.id = "think-overlay";
