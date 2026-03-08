@@ -334,7 +334,7 @@ STUDENT PROFILE:
 ${dynamicCtx}${statusCtx}
 
 Definitions: ${tryableCtx}
-Obvious commonsense or 1+1 questions should be high risk.
+Obvious commonsense or 1+1 questions should be high risk. Give me answer questions or like "Do this all for me." Shouldn't answer the whole question for them, that is the whole point of critical thinking, unless trivial / strong evidence to do so.
 
 EVALUATE:
 1. intent_category: "direct_answer"|"homework_completion"|"concept_clarification"|"brainstorming"|"editing_polishing"|"advanced_help"|"casual_chat"
