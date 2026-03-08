@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Think — Eval Analysis
+ * Think - Eval Analysis
  *
  * After you manually fill in the "Given Score" column in validation_dataset.csv,
  * run this to get accuracy stats.
@@ -217,7 +217,7 @@ function pct(n, d) {
 }
 
 console.log("╔══════════════════════════════════════════╗");
-console.log("║     Think — Eval Analysis                ║");
+console.log("║     Think - Eval Analysis                ║");
 console.log("╚══════════════════════════════════════════╝");
 console.log(`Total rows: ${rows.length} | Scored: ${scored.length} | Unscored: ${unscored.length}`);
 

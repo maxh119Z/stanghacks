@@ -127,7 +127,7 @@ export async function getClassById(classId, idToken) {
   return await getDoc(`classes/${classId}`, idToken);
 }
 
-// Find a class by its join code — scan all classes (small scale, fine for hackathon)
+// Find a class by its join code - scan all classes (small scale, fine for hackathon)
 export async function getClassByCode(code, idToken) {
   const classes = await listDocs("classes", idToken, 500);
   return classes.find((c) => c.code === code.toUpperCase()) || null;

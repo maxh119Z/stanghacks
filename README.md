@@ -1,16 +1,16 @@
 # Think
+
 > Made by [Max Zhang](https://github.com/Maxh119Z/) and [Akshun Chinara](https://github.com/pikull/) at [Stang Hacks 2026](https://www.stanghacks.com/)
 
 ## How It Works
 
 4. GPT-4o-mini classifies your prompt across:
-   - **Intent** — homework, brainstorming, concept help, direct answer, etc.
-   - **Mental risk** — low / medium / high
-   - **Subject** — calculus, english, biology, etc.
-   - **How to intervene** — allow, hint, nudge, or cooldown
-6. Your profile builds dynamically, so if you put something important, it will save that information. Like working on Physics lab, etc.
-7. Dashboard shows usage metrics, category breakdowns, and your knowledge to edit
-
+   - **Intent:** homework, brainstorming, concept help, direct answer, etc.
+   - **Mental risk:** low / medium / high
+   - **Subject:** calculus, english, biology, etc.
+   - **How to intervene:** allow, hint, nudge, or cooldown
+5. Your profile builds dynamically, so if you put something important, it will save that information. Like working on Physics lab, etc.
+6. Dashboard shows usage metrics, category breakdowns, and your knowledge to edit
 
 ### Web Dashboard
 
@@ -70,10 +70,10 @@ users/{uid}/dailyStats/{YYYY-MM-DD}
 
 ## Key Design Decisions
 
-- **OpenAI key stays local** — never sent to Firebase, only in `chrome.storage.sync`
-- **Classification runs async** — nudge shows immediately, Firebase sync happens in background
-- **Fails open** — if classification fails, prompt goes through (never blocks you from working)
-- **5-second cooldown** — not punishing, just enough to make you pause and think
+- **OpenAI key stays local:** never sent to Firebase, only in `chrome.storage.sync`
+- **Classification runs async:** nudge shows immediately, Firebase sync happens in background
+- **Fails open:** if classification fails, prompt goes through (never blocks you from working)
+- **5-second cooldown:** not punishing, just enough to make you pause and think
 
 ## Supported Sites
 
