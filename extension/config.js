@@ -8,18 +8,10 @@ const SITE_CONFIGS = {
       const container = el.closest("form") || el.parentElement?.parentElement;
       if (!container) return [];
       const imgs = container.querySelectorAll('img[src]:not([alt="User"])');
-      return Array.from(imgs)
-        .map((img) => img.src)
-        .filter(
-          (s) =>
-            s.startsWith("blob:") ||
-            s.startsWith("data:") ||
-            s.startsWith("http")
-        );
+      return Array.from(imgs).map((img) => img.src).filter((s) => s.startsWith("blob:") || s.startsWith("data:") || s.startsWith("http"));
     },
     formSelector: "form",
   },
-
   "chat.openai.com": {
     name: "ChatGPT",
     inputSelector: "#prompt-textarea",
@@ -28,7 +20,6 @@ const SITE_CONFIGS = {
     getImages: () => [],
     formSelector: "form",
   },
-
   "claude.ai": {
     name: "Claude",
     inputSelector: '[contenteditable="true"].ProseMirror',
@@ -37,34 +28,12 @@ const SITE_CONFIGS = {
     getImages: (el) => Array.from(el.querySelectorAll("img[src]")).map((i) => i.src),
     formSelector: "fieldset",
   },
-
   "gemini.google.com": {
     name: "Gemini",
     inputSelector: '.ql-editor, [contenteditable="true"]',
     sendButtonSelector: 'button.send-button, button[aria-label="Send message"]',
     getInputText: (el) => el.innerText.trim(),
     getImages: () => [],
-    formSelector: "form",
-  },
-
-  "copilot.microsoft.com": {
-    name: "Copilot",
-    inputSelector: 'textarea, [contenteditable="true"], [role="textbox"]',
-    sendButtonSelector: 'button[aria-label*="Send"], button[type="submit"]',
-    getInputText: (el) =>
-      "value" in el ? el.value.trim() : el.innerText.trim(),
-    getImages: (el) => {
-      const container = el.closest("form") || el.parentElement?.parentElement;
-      if (!container) return [];
-      return Array.from(container.querySelectorAll("img[src]"))
-        .map((img) => img.src)
-        .filter(
-          (s) =>
-            s.startsWith("blob:") ||
-            s.startsWith("data:") ||
-            s.startsWith("http")
-        );
-    },
     formSelector: "form",
   },
 };
