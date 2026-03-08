@@ -35,7 +35,7 @@ async function loadOverview() {
   document.getElementById("oClean").textContent = c;
   document.getElementById("oRate").textContent = t > 0 ? Math.round((n / t) * 100) + "%" : "0%";
   const chart = document.getElementById("weekChart"); chart.innerHTML = "";
-  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
   const ordered = [...stats].reverse();
   const maxV = Math.max(...ordered.map(d => d.total || 0), 1);
   ordered.forEach(day => {
